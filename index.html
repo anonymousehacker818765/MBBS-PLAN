@@ -2,107 +2,109 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>MBBS V10</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MBBS Tracker</title>
 
 <style>
-:root {
-    --bg:#0f172a; --card:#1e293b; --text:#f8fafc; --muted:#94a3b8;
-    --border:#334155; --nav:80px;
-    --anat:#f43f5e; --phy:#22c55e; --bio:#eab308; --primary:#3b82f6;
+:root{
+ --bg:#0f172a;--card:#1e293b;--text:#f8fafc;--muted:#94a3b8;
+ --border:#334155;--nav:80px;
+ --anat:#f43f5e;--phy:#22c55e;--bio:#eab308;--primary:#3b82f6;
 }
-body {
-    margin:0; font-family:system-ui,-apple-system; background:var(--bg);
-    color:var(--text); padding-bottom:calc(var(--nav) + 20px);
+*{box-sizing:border-box}
+body{
+ margin:0;font-family:system-ui;background:var(--bg);color:var(--text);
+ padding-bottom:calc(var(--nav) + 20px)
 }
-.header-wrapper {
-    position:sticky; top:0; z-index:100;
-    background:rgba(15,23,42,.95); border-bottom:1px solid var(--border);
+.header-wrapper{
+ position:sticky;top:0;z-index:100;
+ background:rgba(15,23,42,.95);border-bottom:1px solid var(--border)
 }
-.app-title { padding:16px 20px 6px; margin:0; font-size:1.4rem; font-weight:800; }
-.subject-tabs {
-    display:flex; gap:10px; padding:10px 20px 14px; overflow-x:auto;
+.app-title{padding:16px 20px 6px;margin:0;font-size:1.4rem;font-weight:800}
+.subject-tabs,.status-tabs{
+ display:flex;gap:10px;padding:10px 20px 14px;overflow-x:auto
 }
-.tab-btn {
-    padding:8px 16px; border-radius:20px; border:1px solid var(--border);
-    background:var(--card); color:var(--muted); font-weight:600; cursor:pointer;
+.tab-btn{
+ padding:8px 16px;border-radius:20px;border:1px solid var(--border);
+ background:var(--card);color:var(--muted);font-weight:600;cursor:pointer
 }
-.tab-btn.active { background:#fff; color:#000; }
+.tab-btn.active{background:#fff;color:#000}
 .tab-btn[data-sub="Anatomy"].active{background:var(--anat)}
 .tab-btn[data-sub="Physiology"].active{background:var(--phy)}
 .tab-btn[data-sub="Biochemistry"].active{background:var(--bio)}
 
-.container { padding:20px; }
-.date-divider {
-    margin:30px 0 12px; display:flex; gap:12px; align-items:center;
-    color:var(--muted); font-weight:800; font-size:.8rem;
+.container{padding:20px}
+.date-divider{
+ margin:30px 0 12px;display:flex;gap:12px;align-items:center;
+ color:var(--muted);font-weight:800;font-size:.8rem
 }
-.date-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+.date-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.date-divider.highlight{background:rgba(59,130,246,.15);padding:6px;border-radius:6px}
 
-.task-card {
-    display:flex; background:var(--card); border:1px solid var(--border);
-    border-radius:16px; margin-bottom:12px; overflow:hidden;
+.task-card{
+ display:flex;background:var(--card);border:1px solid var(--border);
+ border-radius:16px;margin-bottom:12px;overflow:hidden
 }
-.card-strip { width:5px; }
+.card-strip{width:5px}
 .task-card[data-sub="Anatomy"] .card-strip{background:var(--anat)}
 .task-card[data-sub="Physiology"] .card-strip{background:var(--phy)}
 .task-card[data-sub="Biochemistry"] .card-strip{background:var(--bio)}
+.card-body{flex:1;padding:14px}
+.badge{
+ font-size:.65rem;font-weight:800;text-transform:uppercase;
+ padding:3px 6px;border-radius:4px;display:inline-block
+}
+.task-card[data-sub="Anatomy"] .badge{color:var(--anat);background:rgba(244,63,94,.2)}
+.task-card[data-sub="Physiology"] .badge{color:var(--phy);background:rgba(34,197,94,.2)}
+.task-card[data-sub="Biochemistry"] .badge{color:var(--bio);background:rgba(234,179,8,.2)}
+.task-title{margin:6px 0 0;font-size:1rem;font-weight:600}
 
-.card-body { flex:1; padding:14px; }
-.badge {
-    font-size:.65rem; font-weight:800; text-transform:uppercase;
-    padding:3px 6px; border-radius:4px; display:inline-block;
+.card-action{padding:0 14px;display:flex;align-items:center}
+.check-btn{
+ width:28px;height:28px;border-radius:50%;
+ border:2px solid var(--border);cursor:pointer;
+ display:flex;align-items:center;justify-content:center
 }
-.task-card[data-sub="Anatomy"] .badge{color:var(--anat); background:rgba(244,63,94,.2)}
-.task-card[data-sub="Physiology"] .badge{color:var(--phy); background:rgba(34,197,94,.2)}
-.task-card[data-sub="Biochemistry"] .badge{color:var(--bio); background:rgba(234,179,8,.2)}
+.task-card.done{opacity:.5}
+.task-card.done .check-btn{background:var(--phy);border-color:var(--phy);color:#000}
 
-.task-title { margin:6px 0 0; font-size:1rem; font-weight:600; }
+.nav-bar{
+ position:fixed;bottom:0;left:0;right:0;height:var(--nav);
+ display:flex;background:rgba(15,23,42,.95);border-top:1px solid var(--border)
+}
+.nav-item{
+ flex:1;background:none;border:none;color:var(--muted);
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ font-weight:600;cursor:pointer
+}
+.nav-item.active{color:var(--text)}
+.nav-icon{font-size:1.4rem}
 
-.card-action { padding:0 14px; display:flex; align-items:center; }
-.check-btn {
-    width:28px; height:28px; border-radius:50%;
-    border:2px solid var(--border); cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-}
-.task-card.done { opacity:.5; }
-.task-card.done .check-btn {
-    background:var(--phy); border-color:var(--phy); color:#000;
-}
+.view-section{display:none}
+.view-section.active{display:block}
 
-.nav-bar {
-    position:fixed; bottom:0; left:0; right:0; height:var(--nav);
-    display:flex; background:rgba(15,23,42,.95); border-top:1px solid var(--border);
+.cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.cal-btn{
+ background:var(--card);border:1px solid var(--border);
+ color:#fff;padding:6px 12px;border-radius:8px
 }
-.nav-item {
-    flex:1; background:none; border:none; color:var(--muted);
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    font-weight:600; cursor:pointer;
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+.cal-day{
+ aspect-ratio:1;background:var(--card);border-radius:10px;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ cursor:pointer
 }
-.nav-item.active { color:var(--text); }
-.nav-icon { font-size:1.4rem; }
-
-.view-section { display:none; }
-.view-section.active { display:block; }
-
-.cal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
-.cal-btn {
-    background:var(--card); border:1px solid var(--border);
-    color:#fff; padding:6px 12px; border-radius:8px;
-}
-.cal-grid {
-    display:grid; grid-template-columns:repeat(7,1fr); gap:6px; text-align:center;
-}
-.cal-day {
-    aspect-ratio:1; background:var(--card); border-radius:10px;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-}
-.cal-day.today { border:2px solid var(--primary); color:var(--primary); font-weight:800; }
-.cal-dots { display:flex; gap:4px; margin-top:4px; }
-.status-dot { width:6px; height:6px; border-radius:50%; }
+.cal-day.today{border:2px solid var(--primary);color:var(--primary);font-weight:800}
+.cal-dots{display:flex;gap:4px;margin-top:4px}
+.status-dot{width:6px;height:6px;border-radius:50%}
 .red{background:var(--anat)} .green{background:var(--phy)}
 
-.loading { text-align:center; padding:60px; color:var(--muted); }
+.progress-card{
+ background:var(--card);border:1px solid var(--border);
+ border-radius:14px;padding:16px;margin-bottom:14px
+}
+.progress-row{display:flex;justify-content:space-between;margin:6px 0}
+.loading{text-align:center;padding:60px;color:var(--muted)}
 </style>
 </head>
 
@@ -110,11 +112,18 @@ body {
 
 <div class="header-wrapper">
 <h1 class="app-title" id="page-title">My Feed</h1>
+
 <div class="subject-tabs">
-<button class="tab-btn active" onclick="filterSubject('All',this)">All</button>
-<button class="tab-btn" data-sub="Anatomy" onclick="filterSubject('Anatomy',this)">Anatomy</button>
-<button class="tab-btn" data-sub="Physiology" onclick="filterSubject('Physiology',this)">Physiology</button>
-<button class="tab-btn" data-sub="Biochemistry" onclick="filterSubject('Biochemistry',this)">Biochemistry</button>
+<button class="tab-btn active" onclick="setSubject('All',this)">All</button>
+<button class="tab-btn" data-sub="Anatomy" onclick="setSubject('Anatomy',this)">Anatomy</button>
+<button class="tab-btn" data-sub="Physiology" onclick="setSubject('Physiology',this)">Physiology</button>
+<button class="tab-btn" data-sub="Biochemistry" onclick="setSubject('Biochemistry',this)">Biochemistry</button>
+</div>
+
+<div class="status-tabs">
+<button class="tab-btn active" onclick="setStatus('All',this)">All</button>
+<button class="tab-btn" onclick="setStatus('Done',this)">Completed</button>
+<button class="tab-btn" onclick="setStatus('Pending',this)">Pending</button>
 </div>
 </div>
 
@@ -136,120 +145,147 @@ body {
 </div>
 </div>
 
+<div id="view-progress" class="view-section">
+<div class="container" id="progress"></div>
+</div>
+
 <div class="nav-bar">
-<button class="nav-item active" onclick="switchView('home',this)">
-<span class="nav-icon">⚡</span>Timeline
-</button>
-<button class="nav-item" onclick="switchView('calendar',this)">
-<span class="nav-icon">📅</span>Calendar
-</button>
+<button class="nav-item active" onclick="switchView('home',this)">⚡<span>Timeline</span></button>
+<button class="nav-item" onclick="switchView('calendar',this)">📅<span>Calendar</span></button>
+<button class="nav-item" onclick="switchView('progress',this)">📊<span>Progress</span></button>
 </div>
 
 <script>
-const SHEET_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vREP7TsehrrFKgBrYNgyJyEc_56SWhnuXWydOyDIvjKGVwC6USsHzNdC13AlojDBuSmvi1D2H9HEudp/pub?output=csv";
-let allData=[],currentSubject='All',currentMonth=new Date();
+const SHEET_URL="PASTE_YOUR_CSV_URL_HERE";
 
-const clean=s=>s? s.replace(/^"|"$/g,'').trim():'';
+let allData=[],subject='All',status='All',month=new Date(),jumpDate=null;
 
-function normalizeDate(s){
-    s=clean(s); if(!s) return null;
-    if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-    const d=new Date(s); if(!isNaN(d)) return d.toISOString().split('T')[0];
-    return null;
-}
-
-function parseCSV(txt){
-    return txt.split('\n').slice(1).map(r=>{
-        if(!r.trim()) return null;
-        const c=r.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g)||r.split(',');
-        if(c.length<4) return null;
-
-        const id=clean(c[0]);
-        const date=normalizeDate(c[1]);
-        if(!date) return null;
-
-        let subject=clean(c[2]);
-        if(subject.includes('Anatomy')) subject='Anatomy';
-        else if(subject.includes('Physiology')) subject='Physiology';
-        else if(subject.includes('Biochemistry')) subject='Biochemistry';
-        else return null;
-
-        let topic=clean(c.slice(3).join(' '));
-        topic=topic.replace(/^\d{4}-\d{2}-\d{2}\s*/,'');
-
-        return {id,date,subject,topic};
-    }).filter(Boolean);
-}
+const clean=s=>s?.replace(/^"|"$/g,'').trim()||'';
 
 async function init(){
-    const res=await fetch(SHEET_URL);
-    allData=parseCSV(await res.text());
-    renderFeed(); renderCalendar();
+ const res=await fetch(SHEET_URL);
+ const txt=await res.text();
+ allData=parseCSV(txt);
+ renderFeed();renderCalendar();renderProgress();
+}
+
+function parseCSV(t){
+ return t.split('\n').slice(1).map((r,i)=>{
+  if(!r.trim()) return null;
+  const c=r.split(',');
+  if(c.length<4) return null;
+  const id=clean(c[0]);
+  const date=clean(c[1]);
+  const subject=clean(c[2]);
+  const topic=clean(c.slice(3).join(','));
+  if(!id||!date||!subject||!topic) return null;
+  return {id,date,subject,topic,order:i};
+ }).filter(Boolean);
 }
 
 function renderFeed(){
-    const el=document.getElementById('feed'); el.innerHTML='';
-    let data=allData;
-    if(currentSubject!=='All') data=data.filter(d=>d.subject===currentSubject);
-    data.sort((a,b)=>new Date(b.date)-new Date(a.date));
-    if(!data.length){el.innerHTML=`<div class="loading">No tasks found</div>`;return;}
-    let last='';
-    data.forEach(t=>{
-        const d=new Date(t.date+'T00:00:00');
-        const ds=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long'});
-        if(ds!==last){el.innerHTML+=`<div class="date-divider">${ds}</div>`; last=ds;}
-        const done=localStorage.getItem(t.id);
-        el.innerHTML+=`
-        <div class="task-card ${done?'done':''}" data-sub="${t.subject}">
-        <div class="card-strip"></div>
-        <div class="card-body">
-        <span class="badge">${t.subject}</span>
-        <div class="task-title">${t.topic}</div>
-        </div>
-        <div class="card-action">
-        <div class="check-btn" onclick="toggle('${t.id}')">${done?'✓':''}</div>
-        </div></div>`;
-    });
+ const el=document.getElementById('feed');el.innerHTML='';
+ let data=[...allData];
+
+ if(subject!=='All') data=data.filter(d=>d.subject===subject);
+ if(status==='Done') data=data.filter(d=>localStorage.getItem(d.id));
+ if(status==='Pending') data=data.filter(d=>!localStorage.getItem(d.id));
+
+ data.sort((a,b)=>a.date.localeCompare(b.date)||a.order-b.order);
+
+ if(!data.length){el.innerHTML='<div class="loading">No tasks</div>';return;}
+
+ let last='';
+ data.forEach(t=>{
+  if(t.date!==last){
+   el.innerHTML+=`<div class="date-divider" id="d-${t.date}">${t.date}</div>`;
+   last=t.date;
+  }
+  const done=localStorage.getItem(t.id);
+  el.innerHTML+=`
+  <div class="task-card ${done?'done':''}" data-sub="${t.subject}">
+  <div class="card-strip"></div>
+  <div class="card-body">
+  <span class="badge">${t.subject}</span>
+  <div class="task-title">${t.topic}</div>
+  </div>
+  <div class="card-action">
+  <div class="check-btn" onclick="toggle('${t.id}')">${done?'✓':''}</div>
+  </div></div>`;
+ });
+
+ if(jumpDate){
+  const target=document.getElementById(`d-${jumpDate}`);
+  if(target){
+   target.scrollIntoView({behavior:'smooth',block:'start'});
+   target.classList.add('highlight');
+   setTimeout(()=>target.classList.remove('highlight'),700);
+  }
+  jumpDate=null;
+ }
 }
 
 function renderCalendar(){
-    const grid=document.getElementById('cal-days'); grid.innerHTML='';
-    const y=currentMonth.getFullYear(), m=currentMonth.getMonth();
-    document.getElementById('cal-title').innerText=
-        currentMonth.toLocaleDateString('en-US',{month:'long',year:'numeric'});
-    const first=new Date(y,m,1).getDay();
-    const days=new Date(y,m+1,0).getDate();
-    for(let i=0;i<first;i++) grid.innerHTML+='<div></div>';
-    for(let d=1;d<=days;d++){
-        const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        let tasks=allData.filter(t=>t.date===ds);
-        if(currentSubject!=='All') tasks=tasks.filter(t=>t.subject===currentSubject);
-        const done=tasks.length && tasks.every(t=>localStorage.getItem(t.id));
-        grid.innerHTML+=`
-        <div class="cal-day">
-        ${d}
-        ${tasks.length?`<div class="cal-dots"><div class="status-dot ${done?'green':'red'}"></div></div>`:''}
-        </div>`;
-    }
+ const grid=document.getElementById('cal-days');grid.innerHTML='';
+ const y=month.getFullYear(),m=month.getMonth();
+ document.getElementById('cal-title').innerText=month.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+ const first=new Date(y,m,1).getDay();
+ const days=new Date(y,m+1,0).getDate();
+ for(let i=0;i<first;i++) grid.innerHTML+='<div></div>';
+ for(let d=1;d<=days;d++){
+  const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  const tasks=allData.filter(t=>t.date===ds);
+  const done=tasks.length&&tasks.every(t=>localStorage.getItem(t.id));
+  grid.innerHTML+=`
+  <div class="cal-day" onclick="jump('${ds}')">
+  ${d}
+  ${tasks.length?`<div class="cal-dots"><div class="status-dot ${done?'green':'red'}"></div></div>`:''}
+  </div>`;
+ }
+}
+
+function renderProgress(){
+ const el=document.getElementById('progress');el.innerHTML='';
+ const total=allData.length;
+ const done=allData.filter(t=>localStorage.getItem(t.id)).length;
+ el.innerHTML+=`
+ <div class="progress-card">
+ <h3>All-time Progress</h3>
+ <div class="progress-row"><span>Total</span><span>${total}</span></div>
+ <div class="progress-row"><span>Completed</span><span>${done}</span></div>
+ <div class="progress-row"><span>Pending</span><span>${total-done}</span></div>
+ </div>`;
+ ['Anatomy','Physiology','Biochemistry'].forEach(s=>{
+  const t=allData.filter(d=>d.subject===s);
+  const d=t.filter(x=>localStorage.getItem(x.id)).length;
+  el.innerHTML+=`
+  <div class="progress-card">
+  <strong>${s}</strong>
+  <div class="progress-row">${d} / ${t.length}</div>
+  </div>`;
+ });
 }
 
 function toggle(id){
-    localStorage.getItem(id)?localStorage.removeItem(id):localStorage.setItem(id,'1');
-    renderFeed(); renderCalendar();
+ localStorage.getItem(id)?localStorage.removeItem(id):localStorage.setItem(id,'1');
+ renderFeed();renderCalendar();renderProgress();
 }
-function filterSubject(s,b){
-    currentSubject=s;
-    document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    renderFeed(); renderCalendar();
+function setSubject(s,b){
+ subject=s;document.querySelectorAll('.subject-tabs .tab-btn').forEach(x=>x.classList.remove('active'));
+ b.classList.add('active');renderFeed();renderCalendar();
 }
-function changeMonth(n){currentMonth.setMonth(currentMonth.getMonth()+n); renderCalendar();}
+function setStatus(s,b){
+ status=s;document.querySelectorAll('.status-tabs .tab-btn').forEach(x=>x.classList.remove('active'));
+ b.classList.add('active');renderFeed();
+}
+function jump(d){jumpDate=d;switchView('home',document.querySelector('.nav-item'))}
+function changeMonth(n){month.setMonth(month.getMonth()+n);renderCalendar();renderProgress()}
 function switchView(v,b){
-    document.querySelectorAll('.view-section').forEach(x=>x.classList.remove('active'));
-    document.getElementById('view-'+v).classList.add('active');
-    document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    document.getElementById('page-title').innerText=v==='home'?'My Feed':'Calendar';
+ document.querySelectorAll('.view-section').forEach(x=>x.classList.remove('active'));
+ document.getElementById('view-'+v).classList.add('active');
+ document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+ b.classList.add('active');
+ document.getElementById('page-title').innerText=v==='home'?'My Feed':v==='calendar'?'Calendar':'Progress';
 }
 init();
 </script>
