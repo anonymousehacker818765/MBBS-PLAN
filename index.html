@@ -2,269 +2,390 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MBBS Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>MBBS Pro Tracker</title>
     <style>
+        /* --- VARIABLES --- */
         :root {
-            --primary: #2563eb;       
-            --success: #10b981;       
-            --warning: #f59e0b;       
-            --bg: #f1f5f9;            
-            --card-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-sub: #64748b;
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #0f172a;
+            --subtext: #64748b;
+            --border: #e2e8f0;
+            --nav-height: 70px;
         }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --card: #1e293b;
+                --text: #f1f5f9;
+                --subtext: #94a3b8;
+                --border: #334155;
+            }
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text-main);
+            font-family: -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             margin: 0;
-            padding-bottom: 40px; 
+            padding-bottom: var(--nav-height); /* Space for bottom nav */
+            -webkit-tap-highlight-color: transparent;
         }
+
+        /* --- HEADER --- */
         .header {
-            background: var(--card-bg);
+            background: rgba(var(--card), 0.9);
+            backdrop-filter: blur(10px);
             padding: 15px 20px;
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-        }
-        .header-top {
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
         }
-        h1 { margin: 0; font-size: 1.2rem; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; }
-        .stats { font-size: 0.8rem; font-weight: 600; color: var(--text-sub); }
-        .progress-container {
-            height: 6px;
-            background: #e2e8f0;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), #3b82f6);
-            width: 0%;
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .filters {
-            display: flex;
-            gap: 10px;
-            padding: 15px 20px 5px 20px;
-            overflow-x: auto;
-            white-space: nowrap;
-            -webkit-overflow-scrolling: touch; 
-        }
-        .filters::-webkit-scrollbar { display: none; }
-        .filter-btn {
-            background: transparent;
-            border: 1px solid #cbd5e1;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            color: var(--text-sub);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .filter-btn.active {
-            background: var(--text-main);
-            color: white;
-            border-color: var(--text-main);
-        }
-        .container { padding: 10px 15px; }
-        .date-header {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #94a3b8;
-            font-weight: 700;
-            margin: 25px 0 10px 5px;
-        }
+        .header h1 { margin: 0; font-size: 1.2rem; }
+        .reset-btn { font-size: 0.8rem; color: var(--primary); background: none; border: none; cursor: pointer; }
+
+        /* --- VIEWS --- */
+        .view-section { display: none; padding: 15px; animation: fadeIn 0.3s; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- TASK CARDS --- */
         .task-card {
-            background: var(--card-bg);
+            background: var(--card);
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-left: 4px solid transparent;
-            transition: transform 0.2s, border-color 0.3s;
         }
-        .task-card:active { transform: scale(0.98); }
-        .task-card.status-done { border-left-color: var(--success); opacity: 0.8; }
-        .task-card.status-review { border-left-color: var(--warning); }
-        .task-card.status-pending { border-left-color: #cbd5e1; }
-        .task-content { flex: 1; padding-right: 15px; }
-        .subject-badge {
-            display: inline-block;
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-bottom: 6px;
-            background: #e0f2fe; color: #0369a1; 
+        .task-card.done { opacity: 0.5; }
+        .task-info h3 { margin: 0 0 5px 0; font-size: 1rem; }
+        .badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; background: #e0f2fe; color: #0284c7; font-weight: bold; text-transform: uppercase;}
+        
+        .check-btn {
+            width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--subtext);
+            background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
-        .tag-Anatomy { background: #fee2e2; color: #991b1b; } 
-        .tag-Physiology { background: #dcfce7; color: #166534; } 
-        .tag-Biochemistry { background: #fef9c3; color: #854d0e; } 
-        .task-title { margin: 0; font-size: 1rem; font-weight: 600; line-height: 1.4; }
-        .actions { display: flex; gap: 8px; }
-        .icon-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            cursor: pointer;
-            background: #f1f5f9;
-            transition: all 0.2s;
+        .check-btn.checked { background: #10b981; border-color: #10b981; color: white; }
+
+        /* --- SUBJECT GRID --- */
+        .subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .sub-card {
+            background: var(--card); padding: 20px; border-radius: 15px; text-align: center;
+            border: 1px solid var(--border); cursor: pointer; transition: transform 0.1s;
         }
-        .status-done .btn-check { background: var(--success); color: white; }
-        .status-review .btn-flag { background: var(--warning); color: white; }
-        .loading { text-align: center; padding: 40px; color: var(--text-sub); }
+        .sub-card:active { transform: scale(0.95); }
+        .sub-icon { font-size: 2rem; display: block; margin-bottom: 10px; }
+        .sub-name { font-weight: bold; display: block; }
+        .sub-count { font-size: 0.8rem; color: var(--subtext); }
+
+        /* --- CALENDAR --- */
+        .calendar-header { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+        .cal-day { padding: 10px 0; font-size: 0.9rem; border-radius: 8px; cursor: pointer; position: relative; }
+        .cal-day.today { background: var(--bg); border: 1px solid var(--primary); color: var(--primary); }
+        .cal-day.has-task::after {
+            content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+            width: 4px; height: 4px; background: var(--primary); border-radius: 50%;
+        }
+        .cal-day.selected { background: var(--primary); color: white; }
+        .cal-day.empty { pointer-events: none; }
+
+        /* --- BOTTOM NAV --- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: var(--nav-height);
+            background: var(--card); border-top: 1px solid var(--border);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 200; padding-bottom: env(safe-area-inset-bottom);
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: var(--subtext); background: none; border: none; font-size: 0.7rem; cursor: pointer; flex: 1; height: 100%;
+        }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
+        .nav-icon { font-size: 1.4rem; margin-bottom: 4px; }
+
+        /* Loading */
+        .loading { text-align: center; padding: 50px; color: var(--subtext); }
+        .empty-msg { text-align: center; color: var(--subtext); margin-top: 50px; }
+
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="header-top">
-            <h1>My MBBS Tracker</h1>
-            <div class="stats" id="progress-text">0% Complete</div>
-        </div>
-        <div class="progress-container">
-            <div class="progress-fill" id="progress-bar"></div>
-        </div>
+        <h1 id="page-title">Daily Feed</h1>
+        <button class="reset-btn" id="filter-reset" style="display:none" onclick="resetFilters()">Clear Filters</button>
     </div>
 
-    <div class="filters">
-        <button class="filter-btn active" onclick="setFilter('all', this)">All Tasks</button>
-        <button class="filter-btn" onclick="setFilter('pending', this)">To Do</button>
-        <button class="filter-btn" onclick="setFilter('done', this)">Completed</button>
+    <div id="view-home" class="view-section active">
+        <div id="feed-container"></div>
     </div>
 
-    <div class="container" id="tracker-container">
-        <div class="loading">Loading your targets...</div>
+    <div id="view-subjects" class="view-section">
+        <div class="subject-grid" id="subject-list"></div>
+    </div>
+
+    <div id="view-calendar" class="view-section">
+        <div class="calendar-header">
+            <span id="cal-month-name"></span>
+            <div>
+                <button onclick="changeMonth(-1)">❮</button>
+                <button onclick="changeMonth(1)">❯</button>
+            </div>
+        </div>
+        <div class="calendar-grid" id="cal-grid"></div>
+        <h3 style="margin-top:20px; font-size:1rem;">Tasks for this day:</h3>
+        <div id="cal-task-list"></div>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-item active" onclick="switchView('home')">
+            <span class="nav-icon">🏠</span> Home
+        </button>
+        <button class="nav-item" onclick="switchView('subjects')">
+            <span class="nav-icon">📚</span> Subjects
+        </button>
+        <button class="nav-item" onclick="switchView('calendar')">
+            <span class="nav-icon">📅</span> Calendar
+        </button>
     </div>
 
     <script>
         // ==========================================
         //  👇 PASTE YOUR GOOGLE SHEET LINK HERE 👇
         // ==========================================
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREP7TsehrrFKgBrYNgyJyEc_56SWhnuXWydOyDIvjKGVwC6USsHzNdC13AlojDBuSmvi1D2H9HEudp/pub?output=csv"; 
+        const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREP7TsehrrFKgBrYNgyJyEc_56SWhnuXWydOyDIvjKGVwC6USsHzNdC13AlojDBuSmvi1D2H9HEudp/pub?output=csv";
         // ==========================================
 
         let allTasks = [];
-        let currentFilter = 'all';
+        let currentMonth = new Date();
 
+        // Init
         async function init() {
+            document.getElementById('feed-container').innerHTML = '<div class="loading">Syncing...</div>';
             try {
-                const response = await fetch(SHEET_URL);
-                const data = await response.text();
-                allTasks = parseCSV(data);
-                render();
-            } catch (error) {
-                document.getElementById('tracker-container').innerHTML = 
-                    '<p style="text-align:center; margin-top:50px; color:red;">⚠️ Error: Could not connect to Sheet.</p>';
+                const res = await fetch(SHEET_URL);
+                const txt = await res.text();
+                allTasks = parseCSV(txt);
+                renderFeed(allTasks); // Initial Render
+                renderSubjects();     // Build Subject Grid
+                renderCalendar();     // Build Calendar
+            } catch (e) {
+                document.getElementById('feed-container').innerHTML = '<div class="empty-msg">Error loading data.</div>';
             }
         }
 
-        function parseCSV(csvText) {
-            const lines = csvText.split('\n');
-            const result = [];
-            for(let i = 1; i < lines.length; i++) {
+        // CSV Parser
+        function parseCSV(text) {
+            const lines = text.split('\n');
+            const data = [];
+            for(let i=1; i<lines.length; i++) {
                 if(!lines[i].trim()) continue;
-                const row = lines[i].split(','); 
-                const id = row[0]?.trim();
-                const date = row[1]?.trim();
-                const subject = row[2]?.trim();
-                const topic = row.slice(3).join(',').trim(); 
-                if(id && topic) {
-                    result.push({ id, date, subject, topic });
-                }
+                const r = lines[i].split(',');
+                const id=r[0]?.trim(); const date=r[1]?.trim(); const sub=r[2]?.trim(); const top=r.slice(3).join(',').trim();
+                if(id && top) data.push({id, date, subject: sub, topic: top});
             }
-            return result.reverse(); 
+            return data.reverse();
         }
 
-        function render() {
-            const container = document.getElementById('tracker-container');
+        // --- RENDER FUNCTIONS ---
+
+        function renderFeed(tasks) {
+            const container = document.getElementById('feed-container');
             container.innerHTML = '';
-            let lastDate = '';
-            let totalTasks = 0;
-            let completedTasks = 0;
-
-            allTasks.forEach(t => {
-                const status = localStorage.getItem(t.id) || 'pending';
-                if(status === 'done') completedTasks++;
-                totalTasks++;
-            });
-
-            const pct = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
-            document.getElementById('progress-bar').style.width = `${pct}%`;
-            document.getElementById('progress-text').innerText = `${pct}% Complete`;
-
-            const filteredTasks = allTasks.filter(task => {
-                const status = localStorage.getItem(task.id) || 'pending';
-                if (currentFilter === 'all') return true;
-                if (currentFilter === 'done') return status === 'done';
-                if (currentFilter === 'pending') return status !== 'done';
-            });
-
-            if (filteredTasks.length === 0) {
-                container.innerHTML = '<div class="loading">No tasks found in this view.</div>';
+            if(tasks.length === 0) {
+                container.innerHTML = '<div class="empty-msg">No tasks found.</div>';
                 return;
             }
 
-            filteredTasks.forEach(item => {
-                const status = localStorage.getItem(item.id) || 'pending';
-                if(item.date !== lastDate) {
-                    const dateHeader = document.createElement('div');
-                    dateHeader.className = 'date-header';
-                    const dateObj = new Date(item.date);
-                    const dateStr = isNaN(dateObj) ? item.date : dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-                    dateHeader.innerText = dateStr;
-                    container.appendChild(dateHeader);
-                    lastDate = item.date;
+            let lastDate = '';
+            tasks.forEach(t => {
+                const isDone = localStorage.getItem(t.id) === 'done';
+                
+                // Date Header
+                if(t.date !== lastDate) {
+                    const dDiv = document.createElement('div');
+                    dDiv.style.margin = "20px 0 10px 5px";
+                    dDiv.style.fontSize = "0.8rem";
+                    dDiv.style.color = "#94a3b8";
+                    dDiv.style.fontWeight = "bold";
+                    dDiv.innerText = new Date(t.date).toDateString();
+                    container.appendChild(dDiv);
+                    lastDate = t.date;
                 }
-                const card = document.createElement('div');
-                card.className = `task-card status-${status}`;
-                card.innerHTML = `
-                    <div class="task-content">
-                        <span class="subject-badge tag-${item.subject}">${item.subject}</span>
-                        <h3 class="task-title">${item.topic}</h3>
+
+                // Card
+                const div = document.createElement('div');
+                div.className = `task-card ${isDone ? 'done' : ''}`;
+                div.innerHTML = `
+                    <div class="task-info">
+                        <span class="badge">${t.subject}</span>
+                        <h3>${t.topic}</h3>
                     </div>
-                    <div class="actions">
-                        <button class="icon-btn btn-flag" onclick="toggleStatus('${item.id}', 'review')">⚠️</button>
-                        <button class="icon-btn btn-check" onclick="toggleStatus('${item.id}', 'done')">✅</button>
-                    </div>
+                    <button class="check-btn ${isDone ? 'checked' : ''}" onclick="toggleTask('${t.id}')">
+                        ${isDone ? '✓' : ''}
+                    </button>
                 `;
-                container.appendChild(card);
+                container.appendChild(div);
             });
         }
 
-        function toggleStatus(id, newStatus) {
-            const current = localStorage.getItem(id);
-            if (current === newStatus) {
-                localStorage.removeItem(id); 
-            } else {
-                localStorage.setItem(id, newStatus); 
-            }
-            render(); 
+        function renderSubjects() {
+            // Find unique subjects
+            const subjects = [...new Set(allTasks.map(t => t.subject))];
+            const container = document.getElementById('subject-list');
+            container.innerHTML = '';
+
+            subjects.forEach(sub => {
+                const count = allTasks.filter(t => t.subject === sub).length;
+                const div = document.createElement('div');
+                div.className = 'sub-card';
+                div.innerHTML = `
+                    <span class="sub-icon">📂</span>
+                    <span class="sub-name">${sub}</span>
+                    <span class="sub-count">${count} Topics</span>
+                `;
+                div.onclick = () => filterBySubject(sub);
+                container.appendChild(div);
+            });
         }
 
-        function setFilter(filterType, btnElement) {
-            currentFilter = filterType;
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            btnElement.classList.add('active');
-            render();
+        function renderCalendar() {
+            const grid = document.getElementById('cal-grid');
+            const monthLabel = document.getElementById('cal-month-name');
+            grid.innerHTML = '';
+            
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth();
+            monthLabel.innerText = currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Headers (S M T W T F S)
+            const days = ['S','M','T','W','T','F','S'];
+            days.forEach(d => {
+                const h = document.createElement('div');
+                h.style.fontSize = '0.8rem'; h.style.fontWeight='bold'; h.style.color='#64748b';
+                h.innerText = d;
+                grid.appendChild(h);
+            });
+
+            // Empty slots
+            for(let i=0; i<firstDay; i++) {
+                const d = document.createElement('div');
+                d.className = 'cal-day empty';
+                grid.appendChild(d);
+            }
+
+            // Days
+            for(let i=1; i<=daysInMonth; i++) {
+                const d = document.createElement('div');
+                d.className = 'cal-day';
+                d.innerText = i;
+                
+                // Check if task exists on this date
+                // Format date to match Sheet (YYYY-MM-DD)
+                const checkDate = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                const hasTask = allTasks.some(t => t.date === checkDate);
+                
+                if(hasTask) d.classList.add('has-task');
+                if(i === new Date().getDate() && month === new Date().getMonth()) d.classList.add('today');
+
+                d.onclick = () => showTasksForDate(checkDate, d);
+                grid.appendChild(d);
+            }
+        }
+
+        // --- INTERACTION ---
+
+        function toggleTask(id) {
+            const cur = localStorage.getItem(id);
+            if(cur) localStorage.removeItem(id);
+            else localStorage.setItem(id, 'done');
+            
+            // Re-render current view logic could be complex, simple reload ensures sync
+            init(); 
+        }
+
+        function switchView(viewName) {
+            // Update Tab Bar
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            event.currentTarget.classList.add('active'); // Highlight clicked button
+
+            // Hide all sections
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            
+            // Show selected
+            document.getElementById(`view-${viewName}`).classList.add('active');
+            
+            // Update Title
+            const titles = { 'home': 'Daily Feed', 'subjects': 'Subjects', 'calendar': 'Calendar' };
+            document.getElementById('page-title').innerText = titles[viewName];
+
+            // Reset filters if leaving filtered view (optional)
+            if(viewName === 'home') {
+                document.getElementById('filter-reset').style.display = 'none';
+                renderFeed(allTasks);
+            }
+        }
+
+        function filterBySubject(sub) {
+            renderFeed(allTasks.filter(t => t.subject === sub));
+            document.getElementById('page-title').innerText = sub;
+            document.getElementById('filter-reset').style.display = 'block';
+            
+            // Manually switch to home view to see results
+            document.getElementById('view-subjects').classList.remove('active');
+            document.getElementById('view-home').classList.add('active');
+            
+            // Update Nav Icons manually
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.querySelector('.nav-item:first-child').classList.add('active');
+        }
+
+        function showTasksForDate(dateStr, element) {
+            // UI Selection
+            document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('selected'));
+            element.classList.add('selected');
+
+            // Filter
+            const tasks = allTasks.filter(t => t.date === dateStr);
+            const list = document.getElementById('cal-task-list');
+            list.innerHTML = '';
+            
+            if(tasks.length === 0) {
+                list.innerHTML = '<div class="empty-msg">No classes recorded.</div>';
+                return;
+            }
+
+            tasks.forEach(t => {
+                const div = document.createElement('div');
+                div.className = 'task-card';
+                div.style.padding = '10px';
+                div.innerHTML = `<div><span class="badge">${t.subject}</span> ${t.topic}</div>`;
+                list.appendChild(div);
+            });
+        }
+
+        function changeMonth(delta) {
+            currentMonth.setMonth(currentMonth.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function resetFilters() {
+            renderFeed(allTasks);
+            document.getElementById('page-title').innerText = 'Daily Feed';
+            document.getElementById('filter-reset').style.display = 'none';
         }
 
         init();
