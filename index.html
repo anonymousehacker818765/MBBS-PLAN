@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MBBS Subject Tracker</title>
+    <title>MBBS Ultimate</title>
     <style>
-        /* --- THEME & VARS --- */
+        /* --- THEME VARS --- */
         :root {
             --primary: #2563eb;
             --bg: #f8fafc;
@@ -16,169 +16,118 @@
             --nav-height: 70px;
             
             /* Subject Colors */
-            --col-anat: #ef4444; /* Red */
-            --col-phy: #22c55e;  /* Green */
-            --col-bio: #eab308;  /* Yellow */
+            --col-anat: #ef4444; 
+            --col-phy: #22c55e;
+            --col-bio: #eab308;
         }
-
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: #0f172a;
-                --card: #1e293b;
-                --text-main: #f1f5f9;
-                --text-sub: #94a3b8;
-                --border: #334155;
+                --bg: #0f172a; --card: #1e293b; --text-main: #f1f5f9; --text-sub: #94a3b8; --border: #334155;
             }
         }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text-main);
-            margin: 0;
-            padding-bottom: calc(var(--nav-height) + 20px);
-            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text-main);
+            margin: 0; padding-bottom: calc(var(--nav-height) + 20px); -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- STICKY HEADER --- */
+        /* --- HEADER & TABS --- */
         .header-wrapper {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(var(--card), 0.95);
-            backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(var(--card), 0.95); backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border);
-            box-shadow: 0 4px 15px -5px rgba(0,0,0,0.05);
         }
-
-        .app-title {
-            padding: 15px 20px 5px 20px;
-            margin: 0;
-            font-size: 1.2rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
-
-        /* --- SUBJECT TABS (SEGMENTED CONTROL) --- */
+        .app-title { padding: 15px 20px 5px 20px; margin: 0; font-size: 1.2rem; font-weight: 800; }
+        
         .subject-tabs {
-            display: flex;
-            padding: 10px 15px 15px 15px;
-            gap: 8px;
-            overflow-x: auto;
-            scrollbar-width: none; /* Hide scrollbar Firefox */
+            display: flex; padding: 10px 15px 15px 15px; gap: 8px; overflow-x: auto;
         }
-        .subject-tabs::-webkit-scrollbar { display: none; } /* Hide scrollbar Chrome */
+        .subject-tabs::-webkit-scrollbar { display: none; }
 
         .tab-btn {
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            background: var(--card);
-            color: var(--text-sub);
-            font-size: 0.85rem;
-            font-weight: 600;
-            white-space: nowrap;
-            cursor: pointer;
-            transition: all 0.2s;
+            padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border);
+            background: var(--card); color: var(--text-sub); font-size: 0.85rem; font-weight: 600;
+            white-space: nowrap; transition: 0.2s;
         }
-
-        .tab-btn.active {
-            background: var(--text-main);
-            color: var(--bg);
-            border-color: var(--text-main);
-            transform: scale(1.02);
-        }
-
-        /* Specific Colors when Active */
+        .tab-btn.active { background: var(--text-main); color: var(--bg); border-color: var(--text-main); }
+        
+        /* Subject Specific Active States */
         .tab-btn[data-sub="Anatomy"].active { background: var(--col-anat); border-color: var(--col-anat); color: white; }
         .tab-btn[data-sub="Physiology"].active { background: var(--col-phy); border-color: var(--col-phy); color: white; }
         .tab-btn[data-sub="Biochemistry"].active { background: var(--col-bio); border-color: var(--col-bio); color: white; }
 
-        /* --- TIMELINE LIST --- */
-        .container { padding: 15px; min-height: 50vh; }
-
+        /* --- FEED --- */
+        .container { padding: 15px; }
         .date-divider {
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: var(--text-sub);
-            margin: 25px 0 10px 5px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 0.8rem; font-weight: 700; color: var(--text-sub); margin: 25px 0 10px 5px;
             display: flex; align-items: center; gap: 10px;
         }
         .date-divider::after { content:''; flex:1; height:1px; background:var(--border); }
 
         .task-card {
-            background: var(--card);
-            border-radius: 14px;
-            padding: 16px;
-            margin-bottom: 12px;
-            border: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.1s;
+            background: var(--card); border-radius: 14px; padding: 16px; margin-bottom: 12px;
+            border: 1px solid var(--border); display: flex; align-items: center;
+            position: relative; overflow: hidden;
         }
-        .task-card:active { transform: scale(0.98); }
-
-        .task-card.done { opacity: 0.6; background: var(--bg); border-color: transparent; }
-
-        /* Left Color Bar */
         .task-card::before {
-            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
-            background: var(--border);
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--border);
         }
         .task-card[data-sub="Anatomy"]::before { background: var(--col-anat); }
         .task-card[data-sub="Physiology"]::before { background: var(--col-phy); }
         .task-card[data-sub="Biochemistry"]::before { background: var(--col-bio); }
-
-        .task-content { flex: 1; padding-left: 10px; padding-right: 15px; }
-        .task-title { margin: 0; font-size: 1rem; font-weight: 600; line-height: 1.4; }
-        .task-sub { font-size: 0.75rem; color: var(--text-sub); margin-top: 4px; font-weight: 500; }
-
-        /* Checkbox UI */
+        
+        .task-card.done { opacity: 0.6; background: var(--bg); }
+        .task-content { flex: 1; padding-left: 10px; }
+        .task-title { margin: 0; font-size: 1rem; font-weight: 600; }
+        .task-sub { font-size: 0.75rem; color: var(--text-sub); margin-top: 4px; }
+        
         .check-circle {
-            width: 28px; height: 28px; border-radius: 50%;
-            border: 2px solid var(--border);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 14px; color: transparent;
-            transition: all 0.2s;
+            width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border);
+            display: flex; align-items: center; justify-content: center; color: transparent;
         }
-        .task-card.done .check-circle {
-            background: var(--primary); border-color: var(--primary); color: white;
-        }
+        .task-card.done .check-circle { background: var(--primary); border-color: var(--primary); color: white; }
 
-        /* --- BOTTOM NAV --- */
+        /* --- CALENDAR --- */
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .cal-btn { background: none; border: 1px solid var(--border); padding: 5px 12px; border-radius: 8px; color: var(--text-main); }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+        
+        .cal-day {
+            aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; border-radius: 8px; position: relative;
+            background: var(--card); border: 1px solid transparent;
+        }
+        .cal-day.today { border-color: var(--primary); color: var(--primary); font-weight: bold; }
+        .cal-day.selected { background: var(--primary); color: white; }
+        
+        /* Dots for tasks */
+        .cal-dots { position: absolute; bottom: 4px; display: flex; gap: 2px; }
+        .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text-sub); }
+        .dot.Anatomy { background: var(--col-anat); }
+        .dot.Physiology { background: var(--col-phy); }
+        .dot.Biochemistry { background: var(--col-bio); }
+
+        /* --- NAV --- */
         .nav-bar {
             position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-height);
             background: var(--card); border-top: 1px solid var(--border);
-            display: flex; justify-content: space-around; align-items: center;
-            padding-bottom: env(safe-area-inset-bottom); z-index: 200;
+            display: flex; justify-content: space-around; align-items: center; z-index: 200;
         }
         .nav-item {
-            flex: 1; background: none; border: none; cursor: pointer;
-            display: flex; flex-direction: column; align-items: center;
+            flex: 1; background: none; border: none; display: flex; flex-direction: column; align-items: center;
             color: var(--text-sub); font-size: 0.7rem; font-weight: 600;
         }
         .nav-icon { font-size: 1.5rem; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary); }
 
-        /* Misc */
-        .loading-msg { text-align: center; padding: 50px 20px; color: var(--text-sub); }
         .view-section { display: none; }
         .view-section.active { display: block; animation: fade 0.3s; }
         @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-
     </style>
 </head>
 <body>
 
     <div class="header-wrapper">
-        <h1 class="app-title" id="page-title">Tracker</h1>
-        
+        <h1 class="app-title" id="page-title">Feed</h1>
         <div class="subject-tabs" id="subject-tabs">
             <button class="tab-btn active" onclick="filterHome('All', this)">All</button>
             <button class="tab-btn" data-sub="Anatomy" onclick="filterHome('Anatomy', this)">Anatomy</button>
@@ -189,13 +138,23 @@
 
     <div id="view-home" class="view-section active">
         <div id="feed-container" class="container">
-            <div class="loading-msg">Syncing...</div>
+            <div style="text-align:center; padding:50px; color:#64748b;">Syncing...</div>
         </div>
     </div>
 
     <div id="view-calendar" class="view-section">
-        <div class="container" style="text-align:center; padding-top:50px; color:#64748b;">
-            <p>Calendar is tracking your dates in the background.</p>
+        <div class="container">
+            <div class="cal-header">
+                <button class="cal-btn" onclick="changeMonth(-1)">❮</button>
+                <span id="cal-month-title" style="font-weight:bold"></span>
+                <button class="cal-btn" onclick="changeMonth(1)">❯</button>
+            </div>
+            <div class="cal-grid" style="margin-bottom:10px; opacity:0.6; font-size:0.8rem;">
+                <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+            </div>
+            <div id="cal-days" class="cal-grid"></div>
+            
+            <div id="cal-tasks-list" style="margin-top:20px;"></div>
         </div>
     </div>
 
@@ -216,6 +175,7 @@
         
         let allData = [];
         let currentFilter = 'All';
+        let currentCalDate = new Date();
 
         async function init() {
             try {
@@ -223,9 +183,9 @@
                 const txt = await res.text();
                 allData = parseCSV(txt);
                 renderFeed();
+                renderCalendar();
             } catch (e) {
-                document.getElementById('feed-container').innerHTML = 
-                    `<div class="loading-msg">⚠️ Connection Error<br>Check internet</div>`;
+                document.getElementById('feed-container').innerHTML = "Error loading data";
             }
         }
 
@@ -235,58 +195,40 @@
                 if(!r.trim()) return null;
                 const c = r.split(',');
                 if(c.length < 4) return null;
-                // Handle commas in topic
                 const topic = c.slice(3).join(',').replace(/"/g, '').trim();
                 return { id: c[0].trim(), date: c[1].trim(), subject: c[2].trim(), topic: topic };
             }).filter(x => x);
         }
 
+        // --- HOME FEED ---
         function renderFeed() {
             const container = document.getElementById('feed-container');
             container.innerHTML = '';
-
-            // Filter Data
-            let displayData = allData;
-            if(currentFilter !== 'All') {
-                displayData = allData.filter(item => item.subject === currentFilter);
-            }
+            
+            let displayData = currentFilter === 'All' ? allData : allData.filter(d => d.subject === currentFilter);
+            displayData.sort((a,b) => new Date(b.date) - new Date(a.date));
 
             if(displayData.length === 0) {
-                container.innerHTML = `<div class="loading-msg">No ${currentFilter} tasks found.</div>`;
+                container.innerHTML = `<div style="text-align:center; padding:40px; color:#94a3b8">No tasks found.</div>`;
                 return;
             }
 
-            // Sort by Date (Newest First)
-            displayData.sort((a,b) => new Date(b.date) - new Date(a.date));
-
             let lastDate = '';
-
             displayData.forEach(task => {
-                // Friendly Date Format
-                const dObj = new Date(task.date);
-                const dateStr = isNaN(dObj) ? task.date : 
-                    dObj.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }); 
-                    // Output: "Wed, 14 Jan"
-
-                // Add Date Header if it changed
-                if(dateStr !== lastDate) {
-                    const header = document.createElement('div');
-                    header.className = 'date-divider';
-                    header.innerText = dateStr;
-                    container.appendChild(header);
-                    lastDate = dateStr;
+                const dStr = new Date(task.date).toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'});
+                if(dStr !== lastDate) {
+                    const h = document.createElement('div'); h.className='date-divider'; h.innerText=dStr;
+                    container.appendChild(h); lastDate = dStr;
                 }
-
-                // Create Card
                 const isDone = localStorage.getItem(task.id) === 'done';
                 const div = document.createElement('div');
                 div.className = `task-card ${isDone ? 'done' : ''}`;
-                div.setAttribute('data-sub', task.subject); // For color bar
-                div.onclick = () => toggleTask(task.id);
-
+                div.setAttribute('data-sub', task.subject);
+                div.onclick = () => { toggleTask(task.id); renderFeed(); renderCalendar(); };
+                
                 div.innerHTML = `
                     <div class="task-content">
-                        <h3 class="task-title">${task.topic}</h3>
+                        <div class="task-title">${task.topic}</div>
                         <div class="task-sub">${task.subject}</div>
                     </div>
                     <div class="check-circle">${isDone ? '✔' : ''}</div>
@@ -295,34 +237,90 @@
             });
         }
 
-        function filterHome(subject, btn) {
-            currentFilter = subject;
-            
-            // Update Buttons
+        function filterHome(sub, btn) {
+            currentFilter = sub;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-
             renderFeed();
         }
 
         function toggleTask(id) {
-            if(localStorage.getItem(id)) localStorage.removeItem(id);
-            else localStorage.setItem(id, 'done');
-            renderFeed();
+            if(localStorage.getItem(id)) localStorage.removeItem(id); else localStorage.setItem(id, 'done');
         }
 
+        // --- CALENDAR ---
+        function renderCalendar() {
+            const grid = document.getElementById('cal-days');
+            const title = document.getElementById('cal-month-title');
+            grid.innerHTML = '';
+            
+            const year = currentCalDate.getFullYear();
+            const month = currentCalDate.getMonth();
+            title.innerText = currentCalDate.toLocaleDateString('en-US', {month:'long', year:'numeric'});
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for(let i=0; i<firstDay; i++) grid.innerHTML += `<div></div>`;
+
+            for(let i=1; i<=daysInMonth; i++) {
+                const dayStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                const dayTasks = allData.filter(t => t.date === dayStr);
+                const isToday = new Date().toDateString() === new Date(year, month, i).toDateString();
+
+                const el = document.createElement('div');
+                el.className = `cal-day ${isToday ? 'today' : ''}`;
+                el.innerText = i;
+                
+                // Dots
+                if(dayTasks.length > 0) {
+                    const dotsDiv = document.createElement('div'); dotsDiv.className = 'cal-dots';
+                    // Show max 3 dots, colored by subject
+                    dayTasks.slice(0,3).forEach(t => {
+                        const dot = document.createElement('div'); 
+                        dot.className = `dot ${t.subject}`;
+                        dotsDiv.appendChild(dot);
+                    });
+                    el.appendChild(dotsDiv);
+                }
+                
+                el.onclick = () => showDayTasks(dayTasks, el);
+                grid.appendChild(el);
+            }
+        }
+
+        function showDayTasks(tasks, el) {
+            document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('selected'));
+            el.classList.add('selected');
+            
+            const list = document.getElementById('cal-tasks-list');
+            list.innerHTML = '';
+            if(tasks.length === 0) { list.innerHTML = '<div style="text-align:center; color:#94a3b8">No classes.</div>'; return; }
+
+            tasks.forEach(task => {
+                const isDone = localStorage.getItem(task.id) === 'done';
+                const div = document.createElement('div');
+                div.className = `task-card ${isDone ? 'done' : ''}`;
+                div.setAttribute('data-sub', task.subject);
+                div.onclick = () => { toggleTask(task.id); showDayTasks(tasks, el); renderFeed(); }; // update both views
+                div.innerHTML = `<div class="task-content"><div class="task-title">${task.topic}</div></div><div class="check-circle">${isDone?'✔':''}</div>`;
+                list.appendChild(div);
+            });
+        }
+
+        function changeMonth(d) { currentCalDate.setMonth(currentCalDate.getMonth()+d); renderCalendar(); }
+
+        // --- NAV ---
         function switchView(view, btn) {
-            // Simple view switcher
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
             document.getElementById(`view-${view}`).classList.add('active');
             
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             btn.classList.add('active');
-
-            // Hide/Show Top Filters based on view
-            const tabs = document.getElementById('subject-tabs');
-            tabs.style.display = view === 'home' ? 'flex' : 'none';
-            document.getElementById('page-title').innerText = view === 'home' ? 'Tracker' : 'Calendar';
+            
+            // Hide Tabs on Calendar
+            document.getElementById('subject-tabs').style.display = view === 'home' ? 'flex' : 'none';
+            document.getElementById('page-title').innerText = view === 'home' ? 'Feed' : 'Calendar';
         }
 
         init();
