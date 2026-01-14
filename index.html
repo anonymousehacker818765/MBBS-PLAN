@@ -280,8 +280,34 @@ function renderFeed(){
 
     const title = document.createElement('div');
     title.className = 'task-title';
-    title.textContent = t.topic;
-
+    
+    if (t.topic.includes('|')) {
+      const parts = t.topic.split('|').map(p => p.trim()).filter(Boolean);
+    
+      // First part as heading
+      const head = document.createElement('div');
+      head.style.fontWeight = '700';
+      head.style.marginBottom = '6px';
+      head.textContent = parts[0];
+    
+      // Remaining parts as bullet list
+      const ul = document.createElement('ul');
+      ul.style.margin = '6px 0 0 18px';
+      ul.style.padding = '0';
+      ul.style.lineHeight = '1.5';
+    
+      parts.slice(1).forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        ul.appendChild(li);
+      });
+    
+      title.appendChild(head);
+      title.appendChild(ul);
+    } else {
+      title.textContent = t.topic;
+    }
+    
     body.append(badge, title);
 
     const act = document.createElement('div');
