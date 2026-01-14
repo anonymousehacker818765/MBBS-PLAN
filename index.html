@@ -1,36 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>MBBS Tracker</title>
 
 <style>
 :root{
- --bg:#0f172a;--card:#1e293b;--text:#f8fafc;--muted:#94a3b8;
- --border:#334155;--nav:80px;
- --anat:#f43f5e;--phy:#22c55e;--bio:#eab308;--primary:#3b82f6;
+  --bg:#0f172a; --card:#1e293b; --text:#f8fafc; --muted:#94a3b8;
+  --border:#334155; --nav:80px;
+  --anat:#f43f5e; --phy:#22c55e; --bio:#eab308; --primary:#3b82f6;
 }
 *{box-sizing:border-box}
 body{
- margin:0;font-family:system-ui,-apple-system;
- background:var(--bg);color:var(--text);
- padding-bottom:calc(var(--nav) + 20px);
+  margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui;
+  background:var(--bg); color:var(--text);
+  padding-bottom:calc(var(--nav) + 20px);
 }
+
+/* Header */
 .header{
- position:sticky;top:0;z-index:100;
- background:rgba(15,23,42,.96);
- border-bottom:1px solid var(--border);
+  position:sticky; top:0; z-index:100;
+  background:rgba(15,23,42,.96);
+  border-bottom:1px solid var(--border);
 }
-.title{padding:16px 20px 6px;margin:0;font-size:1.4rem;font-weight:800}
-.tabs{display:flex;gap:10px;padding:10px 20px 12px;overflow-x:auto}
+.title{padding:16px 20px 6px; margin:0; font-size:1.4rem; font-weight:800}
+.tabs{display:flex; gap:10px; padding:10px 20px 12px; overflow-x:auto}
 .tab-btn{
- padding:8px 16px;border-radius:20px;
- border:1px solid var(--border);
- background:var(--card);color:var(--muted);
- font-weight:600;cursor:pointer;
+  padding:8px 16px; border-radius:20px;
+  border:1px solid var(--border);
+  background:var(--card); color:var(--muted);
+  font-weight:600; cursor:pointer;
 }
-.tab-btn.active{background:#fff;color:#000}
+.tab-btn.active{background:#fff; color:#000}
 .tab-btn[data-sub="Anatomy"].active{background:var(--anat)}
 .tab-btn[data-sub="Physiology"].active{background:var(--phy)}
 .tab-btn[data-sub="Biochemistry"].active{background:var(--bio)}
@@ -39,224 +41,423 @@ body{
 .view{display:none}
 .view.active{display:block}
 
+/* Feed */
 .date-divider{
- margin:32px 0 14px;display:flex;gap:12px;align-items:center;
- font-size:.8rem;font-weight:800;color:var(--muted);
+  margin:32px 0 14px; display:flex; gap:12px; align-items:center;
+  font-size:.8rem; font-weight:800; color:var(--muted);
 }
-.date-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.date-divider::after{content:''; flex:1; height:1px; background:var(--border)}
 .date-divider.highlight{
- background:rgba(59,130,246,.15);
- padding:6px 10px;border-radius:6px;
+  background:rgba(59,130,246,.15);
+  padding:6px 10px; border-radius:6px;
 }
 
 .task{
- display:flex;background:var(--card);
- border:1px solid var(--border);
- border-radius:16px;margin-bottom:14px;overflow:hidden;
+  display:flex; background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px; margin-bottom:14px; overflow:hidden;
 }
 .strip{width:5px}
 .task[data-sub="Anatomy"] .strip{background:var(--anat)}
 .task[data-sub="Physiology"] .strip{background:var(--phy)}
 .task[data-sub="Biochemistry"] .strip{background:var(--bio)}
 
-.task-body{flex:1;padding:14px 16px}
+.task-body{flex:1; padding:14px 16px}
 .badge{
- font-size:.65rem;font-weight:800;
- text-transform:uppercase;
- padding:3px 6px;border-radius:4px;display:inline-block;
+  font-size:.65rem; font-weight:800; text-transform:uppercase;
+  padding:3px 6px; border-radius:4px; display:inline-block;
 }
-.task[data-sub="Anatomy"] .badge{color:var(--anat);background:rgba(244,63,94,.2)}
-.task[data-sub="Physiology"] .badge{color:var(--phy);background:rgba(34,197,94,.2)}
-.task[data-sub="Biochemistry"] .badge{color:var(--bio);background:rgba(234,179,8,.2)}
+.task[data-sub="Anatomy"] .badge{color:var(--anat); background:rgba(244,63,94,.2)}
+.task[data-sub="Physiology"] .badge{color:var(--phy); background:rgba(34,197,94,.2)}
+.task[data-sub="Biochemistry"] .badge{color:var(--bio); background:rgba(234,179,8,.2)}
 
-.task-title{margin-top:6px;font-size:1rem;font-weight:600;line-height:1.5}
+.task-title{margin-top:6px; font-size:1rem; font-weight:600; line-height:1.5}
 
-.task-action{padding:0 16px;display:flex;align-items:center}
+.task-action{padding:0 16px; display:flex; align-items:center}
 .check{
- width:28px;height:28px;border-radius:50%;
- border:2px solid var(--border);
- display:flex;align-items:center;justify-content:center;
- cursor:pointer;
+  width:28px; height:28px; border-radius:50%;
+  border:2px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
 }
 .task.done{opacity:.5}
-.task.done .check{background:var(--phy);border-color:var(--phy);color:#000}
+.task.done .check{background:var(--phy); border-color:var(--phy); color:#000}
 
+/* Calendar */
+.cal-header{
+  display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;
+}
+.cal-btn{
+  background:var(--card); border:1px solid var(--border);
+  color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;
+}
+.cal-title{font-weight:800}
+.weekdays{
+  display:grid; grid-template-columns:repeat(7,1fr);
+  gap:6px; opacity:.6; font-size:.8rem; margin-bottom:6px;
+}
+.weekdays div{text-align:center}
+.cal-grid{
+  display:grid; grid-template-columns:repeat(7,1fr); gap:6px;
+}
+.cal-day{
+  aspect-ratio:1; background:var(--card); border-radius:10px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  cursor:pointer; position:relative;
+}
+.cal-day.inactive{opacity:.35}
+.cal-day.today{border:2px solid var(--primary); color:var(--primary); font-weight:800}
+.cal-dots{display:flex; gap:4px; margin-top:4px}
+.dot{width:6px; height:6px; border-radius:50%}
+.red{background:var(--anat)}
+.green{background:var(--phy)}
+
+/* Progress */
+.progress-card{
+  background:var(--card); border:1px solid var(--border);
+  border-radius:14px; padding:16px; margin-bottom:14px;
+}
+.progress-row{display:flex; justify-content:space-between; margin:6px 0; color:var(--muted)}
+
+/* Nav */
 .nav{
- position:fixed;bottom:0;left:0;right:0;
- height:var(--nav);background:rgba(15,23,42,.96);
- border-top:1px solid var(--border);
- display:flex;
+  position:fixed; bottom:0; left:0; right:0;
+  height:var(--nav); background:rgba(15,23,42,.96);
+  border-top:1px solid var(--border); display:flex;
 }
 .nav-btn{
- flex:1;border:none;background:none;color:var(--muted);
- display:flex;flex-direction:column;align-items:center;justify-content:center;
- font-weight:600;cursor:pointer;
+  flex:1; border:none; background:none; color:var(--muted);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-weight:600; cursor:pointer;
 }
 .nav-btn.active{color:var(--text)}
-.nav-icon{font-size:1.4rem;margin-bottom:4px}
-
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.cal-day{
- aspect-ratio:1;background:var(--card);
- border-radius:10px;display:flex;
- flex-direction:column;align-items:center;justify-content:center;
- cursor:pointer;
-}
-.cal-day.today{border:2px solid var(--primary);color:var(--primary);font-weight:800}
-.cal-dots{display:flex;gap:4px;margin-top:4px}
-.dot{width:6px;height:6px;border-radius:50%}
-.red{background:var(--anat)} .green{background:var(--phy)}
-
-.progress-card{
- background:var(--card);border:1px solid var(--border);
- border-radius:14px;padding:16px;margin-bottom:14px;
-}
-.progress-row{display:flex;justify-content:space-between;margin:6px 0;color:var(--muted)}
+.nav-icon{font-size:1.4rem; margin-bottom:4px}
 </style>
 </head>
 
 <body>
 
 <div class="header">
-<h1 class="title" id="pageTitle">My Feed</h1>
+  <h1 class="title" id="pageTitle">My Feed</h1>
 
-<div id="feedFilters">
-  <div class="tabs">
-    <button class="tab-btn active" onclick="setSubject('All',this)">All</button>
-    <button class="tab-btn" data-sub="Anatomy" onclick="setSubject('Anatomy',this)">Anatomy</button>
-    <button class="tab-btn" data-sub="Physiology" onclick="setSubject('Physiology',this)">Physiology</button>
-    <button class="tab-btn" data-sub="Biochemistry" onclick="setSubject('Biochemistry',this)">Biochemistry</button>
-  </div>
-  <div class="tabs">
-    <button class="tab-btn active" onclick="setStatus('All',this)">All</button>
-    <button class="tab-btn" onclick="setStatus('Done',this)">Completed</button>
-    <button class="tab-btn" onclick="setStatus('Pending',this)">Pending</button>
+  <!-- Feed-only filters -->
+  <div id="feedFilters">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="setSubject('All',this)">All</button>
+      <button class="tab-btn" data-sub="Anatomy" onclick="setSubject('Anatomy',this)">Anatomy</button>
+      <button class="tab-btn" data-sub="Physiology" onclick="setSubject('Physiology',this)">Physiology</button>
+      <button class="tab-btn" data-sub="Biochemistry" onclick="setSubject('Biochemistry',this)">Biochemistry</button>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="setStatus('All',this)">All</button>
+      <button class="tab-btn" onclick="setStatus('Done',this)">Completed</button>
+      <button class="tab-btn" onclick="setStatus('Pending',this)">Pending</button>
+    </div>
   </div>
 </div>
+
+<div id="feedView" class="view active">
+  <div class="container" id="feed"></div>
 </div>
 
-<div id="feedView" class="view active"><div class="container" id="feed"></div></div>
-<div id="calendarView" class="view"><div class="container"><div class="cal-grid" id="calendar"></div></div></div>
-<div id="progressView" class="view"><div class="container" id="progress"></div></div>
+<div id="calendarView" class="view">
+  <div class="container">
+    <div class="cal-header">
+      <button class="cal-btn" onclick="changeMonth(-1)">◀</button>
+      <div class="cal-title" id="calTitle"></div>
+      <button class="cal-btn" onclick="changeMonth(1)">▶</button>
+    </div>
+    <div class="weekdays">
+      <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+    </div>
+    <div class="cal-grid" id="calendar"></div>
+  </div>
+</div>
+
+<div id="progressView" class="view">
+  <div class="container" id="progress"></div>
+</div>
 
 <div class="nav">
-<button class="nav-btn active" onclick="showView('feed')"><div class="nav-icon">⚡</div>Timeline</button>
-<button class="nav-btn" onclick="showView('calendar')"><div class="nav-icon">📅</div>Calendar</button>
-<button class="nav-btn" onclick="showView('progress')"><div class="nav-icon">📊</div>Progress</button>
+  <button class="nav-btn active" onclick="showView('feed',this)">
+    <div class="nav-icon">⚡</div>Timeline
+  </button>
+  <button class="nav-btn" onclick="showView('calendar',this)">
+    <div class="nav-icon">📅</div>Calendar
+  </button>
+  <button class="nav-btn" onclick="showView('progress',this)">
+    <div class="nav-icon">📊</div>Progress
+  </button>
 </div>
 
 <script>
-const SHEET_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vREP7TsehrrFKgBrYNgyJyEc_56SWhnuXWydOyDIvjKGVwC6USsHzNdC13AlojDBuSmvi1D2H9HEudp/pub?output=csv";
+/* =========================
+   CONFIG
+========================= */
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREP7TsehrrFKgBrYNgyJyEc_56SWhnuXWydOyDIvjKGVwC6USsHzNdC13AlojDBuSmvi1D2H9HEudp/pub?output=csv";
 
-let data=[],subject='All',status='All',jumpDate=null;
+/* =========================
+   STATE
+========================= */
+let allData = [];
+let subjectFilter = 'All';
+let statusFilter = 'All';
+let currentMonth = new Date(); // shared between calendar & monthly progress
+let jumpDate = null;
 
-const feed=document.getElementById('feed');
-const calendar=document.getElementById('calendar');
+/* =========================
+   HELPERS
+========================= */
+const clean = s => s?.replace(/^"|"$/g,'').trim() || '';
+const pad = n => String(n).padStart(2,'0');
+const toKey = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const displayDate = key => {
+  const [y,m,d] = key.split('-');
+  return `${d}/${m}/${y}`; // DD/MM/YYYY
+};
+const monthTitle = d => d.toLocaleDateString('en-GB',{month:'long', year:'numeric'});
 
-const clean=s=>s?.replace(/^"|"$/g,'').trim()||'';
+/* =========================
+   INIT
+========================= */
+fetch(SHEET_URL).then(r=>r.text()).then(text=>{
+  allData = text.split('\n').slice(1).map((row,i)=>{
+    if(!row.trim()) return null;
+    const c = row.split(',');
+    if(c.length < 4) return null;
+    return {
+      id: clean(c[0]),
+      date: clean(c[1]),       // YYYY-MM-DD
+      subject: clean(c[2]),
+      topic: clean(c.slice(3).join(',')),
+      order: i
+    };
+  }).filter(Boolean);
 
-fetch(SHEET_URL).then(r=>r.text()).then(t=>{
- data=t.split('\n').slice(1).map((r,i)=>{
-  if(!r.trim())return null;
-  const c=r.split(',');
-  return{ id:clean(c[0]),date:clean(c[1]),subject:clean(c[2]),topic:clean(c.slice(3).join(',')),order:i };
- }).filter(Boolean);
- renderFeed();renderCalendar();renderProgress();
+  renderFeed();
+  renderCalendar();
+  renderProgress();
 });
 
+/* =========================
+   FEED
+========================= */
 function renderFeed(){
- feed.innerHTML='';
- let d=[...data];
- if(subject!=='All')d=d.filter(x=>x.subject===subject);
- if(status==='Done')d=d.filter(x=>localStorage.getItem(x.id));
- if(status==='Pending')d=d.filter(x=>!localStorage.getItem(x.id));
- d.sort((a,b)=>a.date.localeCompare(b.date)||a.order-b.order);
+  const feed = document.getElementById('feed');
+  feed.innerHTML = '';
 
- let last='';
- d.forEach(t=>{
-  if(t.date!==last){
-   const h=document.createElement('div');
-   h.className='date-divider';h.id='d-'+t.date;h.textContent=t.date;
-   feed.appendChild(h);last=t.date;
+  let data = [...allData];
+  if(subjectFilter !== 'All') data = data.filter(t=>t.subject === subjectFilter);
+  if(statusFilter === 'Done') data = data.filter(t=>localStorage.getItem(t.id));
+  if(statusFilter === 'Pending') data = data.filter(t=>!localStorage.getItem(t.id));
+
+  data.sort((a,b)=>a.date.localeCompare(b.date) || a.order-b.order);
+
+  let lastKey = '';
+  data.forEach(t=>{
+    if(t.date !== lastKey){
+      const h = document.createElement('div');
+      h.className = 'date-divider';
+      h.id = 'd-' + t.date;
+      h.textContent = displayDate(t.date);
+      feed.appendChild(h);
+      lastKey = t.date;
+    }
+
+    const task = document.createElement('div');
+    task.className = 'task' + (localStorage.getItem(t.id)?' done':'');
+    task.dataset.sub = t.subject;
+
+    const strip = document.createElement('div');
+    strip.className = 'strip';
+
+    const body = document.createElement('div');
+    body.className = 'task-body';
+
+    const badge = document.createElement('span');
+    badge.className = 'badge';
+    badge.textContent = t.subject;
+
+    const title = document.createElement('div');
+    title.className = 'task-title';
+    title.textContent = t.topic;
+
+    body.append(badge, title);
+
+    const act = document.createElement('div');
+    act.className = 'task-action';
+
+    const chk = document.createElement('div');
+    chk.className = 'check';
+    chk.textContent = localStorage.getItem(t.id)?'✓':'';
+    chk.onclick = ()=>{
+      localStorage.getItem(t.id) ? localStorage.removeItem(t.id) : localStorage.setItem(t.id,'1');
+      renderFeed(); renderCalendar(); renderProgress();
+    };
+
+    act.appendChild(chk);
+    task.append(strip, body, act);
+    feed.appendChild(task);
+  });
+
+  if(jumpDate){
+    const el = document.getElementById('d-' + jumpDate);
+    if(el){
+      el.scrollIntoView({behavior:'smooth', block:'start'});
+      el.classList.add('highlight');
+      setTimeout(()=>el.classList.remove('highlight'),700);
+    }
+    jumpDate = null;
   }
-  const task=document.createElement('div');
-  task.className='task'+(localStorage.getItem(t.id)?' done':'');
-  task.dataset.sub=t.subject;
-
-  const strip=document.createElement('div');strip.className='strip';
-  const body=document.createElement('div');body.className='task-body';
-  const badge=document.createElement('span');badge.className='badge';badge.textContent=t.subject;
-  const title=document.createElement('div');title.className='task-title';title.textContent=t.topic;
-  body.append(badge,title);
-
-  const act=document.createElement('div');act.className='task-action';
-  const chk=document.createElement('div');chk.className='check';
-  chk.textContent=localStorage.getItem(t.id)?'✓':'';
-  chk.onclick=()=>{localStorage.getItem(t.id)?localStorage.removeItem(t.id):localStorage.setItem(t.id,'1');renderFeed();renderCalendar();renderProgress();};
-  act.appendChild(chk);
-
-  task.append(strip,body,act);
-  feed.appendChild(task);
- });
-
- if(jumpDate){
-  const el=document.getElementById('d-'+jumpDate);
-  if(el){el.scrollIntoView({behavior:'smooth'});el.classList.add('highlight');setTimeout(()=>el.classList.remove('highlight'),700);}
-  jumpDate=null;
- }
 }
 
+/* =========================
+   CALENDAR (FULL MONTH)
+========================= */
 function renderCalendar(){
- calendar.innerHTML='';
- const today=new Date().toISOString().split('T')[0];
- data.forEach(t=>{
-  if(!calendar.querySelector('[data-date="'+t.date+'"]')){
-   const d=document.createElement('div');d.className='cal-day';d.dataset.date=t.date;
-   if(t.date===today)d.classList.add('today');
-   d.textContent=t.date.split('-')[2];
-   d.onclick=()=>{jumpDate=t.date;showView('feed');};
-   calendar.appendChild(d);
+  const cal = document.getElementById('calendar');
+  const title = document.getElementById('calTitle');
+  cal.innerHTML = '';
+  title.textContent = monthTitle(currentMonth);
+
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+
+  // Leading blanks
+  for(let i=0;i<firstDay;i++){
+    const blank = document.createElement('div');
+    blank.className = 'cal-day inactive';
+    cal.appendChild(blank);
   }
- });
+
+  const todayKey = toKey(new Date());
+
+  for(let d=1; d<=daysInMonth; d++){
+    const key = `${year}-${pad(month+1)}-${pad(d)}`;
+    const cell = document.createElement('div');
+    cell.className = 'cal-day';
+    if(key === todayKey) cell.classList.add('today');
+    cell.textContent = d;
+
+    // dot logic (truthful, filter-independent)
+    const dayTasks = allData.filter(t=>t.date === key);
+    if(dayTasks.length){
+      const allDone = dayTasks.every(t=>localStorage.getItem(t.id));
+      const dots = document.createElement('div');
+      dots.className = 'cal-dots';
+      const dot = document.createElement('div');
+      dot.className = 'dot ' + (allDone ? 'green' : 'red');
+      dots.appendChild(dot);
+      cell.appendChild(dots);
+
+      cell.onclick = ()=>{
+        jumpDate = key;
+        showView('feed', document.querySelector('.nav-btn'));
+      };
+    }else{
+      cell.onclick = ()=>{}; // no-op
+    }
+
+    cal.appendChild(cell);
+  }
 }
 
+function changeMonth(delta){
+  currentMonth.setMonth(currentMonth.getMonth() + delta);
+  renderCalendar();
+  renderProgress(); // shared month state
+}
+
+/* =========================
+   PROGRESS
+========================= */
 function renderProgress(){
- const p=document.getElementById('progress');p.innerHTML='';
- const total=data.length;
- const done=data.filter(x=>localStorage.getItem(x.id)).length;
- const card=document.createElement('div');card.className='progress-card';
- card.innerHTML=`<strong>All-time</strong>
- <div class="progress-row"><span>Total</span><span>${total}</span></div>
- <div class="progress-row"><span>Completed</span><span>${done}</span></div>
- <div class="progress-row"><span>Pending</span><span>${total-done}</span></div>`;
- p.appendChild(card);
+  const p = document.getElementById('progress');
+  p.innerHTML = '';
 
- ['Anatomy','Physiology','Biochemistry'].forEach(s=>{
-  const t=data.filter(x=>x.subject===s);
-  const d=t.filter(x=>localStorage.getItem(x.id)).length;
-  const c=document.createElement('div');c.className='progress-card';
-  c.innerHTML=`<strong>${s}</strong>
-  <div class="progress-row"><span>Completed</span><span>${d} / ${t.length}</span></div>`;
-  p.appendChild(c);
- });
+  // All-time
+  const total = allData.length;
+  const done = allData.filter(t=>localStorage.getItem(t.id)).length;
+
+  const allCard = document.createElement('div');
+  allCard.className = 'progress-card';
+  allCard.innerHTML = `
+    <strong>All-time</strong>
+    <div class="progress-row"><span>Total</span><span>${total}</span></div>
+    <div class="progress-row"><span>Completed</span><span>${done}</span></div>
+    <div class="progress-row"><span>Pending</span><span>${total-done}</span></div>
+  `;
+  p.appendChild(allCard);
+
+  // Subject-wise
+  ['Anatomy','Physiology','Biochemistry'].forEach(s=>{
+    const t = allData.filter(x=>x.subject===s);
+    const d = t.filter(x=>localStorage.getItem(x.id)).length;
+    const c = document.createElement('div');
+    c.className = 'progress-card';
+    c.innerHTML = `
+      <strong>${s}</strong>
+      <div class="progress-row"><span>Completed</span><span>${d} / ${t.length}</span></div>
+    `;
+    p.appendChild(c);
+  });
+
+  // Monthly (shared with calendar month)
+  const y = currentMonth.getFullYear();
+  const m = currentMonth.getMonth()+1;
+  const monthTasks = allData.filter(t=>{
+    const [yy,mm] = t.date.split('-').map(Number);
+    return yy===y && mm===m;
+  });
+  const mdone = monthTasks.filter(t=>localStorage.getItem(t.id)).length;
+
+  const mcard = document.createElement('div');
+  mcard.className = 'progress-card';
+  mcard.innerHTML = `
+    <strong>${monthTitle(currentMonth)} (Monthly)</strong>
+    <div class="progress-row"><span>Total</span><span>${monthTasks.length}</span></div>
+    <div class="progress-row"><span>Completed</span><span>${mdone}</span></div>
+    <div class="progress-row"><span>Pending</span><span>${monthTasks.length-mdone}</span></div>
+  `;
+  p.appendChild(mcard);
 }
 
-function setSubject(s,b){
- subject=s;document.querySelectorAll('#feedFilters .tabs:first-child .tab-btn').forEach(x=>x.classList.remove('active'));
- b.classList.add('active');renderFeed();
+/* =========================
+   FILTERS (FEED ONLY)
+========================= */
+function setSubject(s, btn){
+  subjectFilter = s;
+  document.querySelectorAll('#feedFilters .tabs:first-child .tab-btn')
+    .forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderFeed();
 }
-function setStatus(s,b){
- status=s;document.querySelectorAll('#feedFilters .tabs:last-child .tab-btn').forEach(x=>x.classList.remove('active'));
- b.classList.add('active');renderFeed();
+function setStatus(s, btn){
+  statusFilter = s;
+  document.querySelectorAll('#feedFilters .tabs:last-child .tab-btn')
+    .forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderFeed();
 }
-function showView(v){
- document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
- document.getElementById(v+'View').classList.add('active');
- document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
- event.target.closest('.nav-btn').classList.add('active');
- document.getElementById('feedFilters').style.display=v==='feed'?'block':'none';
- document.getElementById('pageTitle').textContent=v==='feed'?'My Feed':v==='calendar'?'Calendar':'Progress';
- if(v==='progress')renderProgress();
+
+/* =========================
+   NAV
+========================= */
+function showView(view, btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(view+'View').classList.add('active');
+
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn && btn.classList.add('active');
+
+  document.getElementById('feedFilters').style.display = view==='feed'?'block':'none';
+  document.getElementById('pageTitle').textContent =
+    view==='feed'?'My Feed':view==='calendar'?'Calendar':'Progress';
+
+  if(view==='progress') renderProgress();
 }
 </script>
 
