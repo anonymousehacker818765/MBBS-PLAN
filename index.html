@@ -1,406 +1,257 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MBBS V10</title>
-    <style>
-        /* --- DARK THEME VARS --- */
-        :root {
-            --bg: #0f172a; 
-            --card-bg: #1e293b; 
-            --text-main: #f8fafc; 
-            --text-sub: #94a3b8; 
-            --border: #334155; 
-            --nav-height: 80px;
-            
-            /* SUBJECT COLORS */
-            --anat: #f43f5e;   /* Red */
-            --phy: #22c55e;    /* Green */
-            --bio: #eab308;    /* Yellow */
-            --comm: #8b5cf6;   /* Purple */
-            --primary: #3b82f6;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MBBS V10</title>
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: var(--bg); color: var(--text-main); margin: 0; 
-            padding-bottom: calc(var(--nav-height) + 20px); -webkit-tap-highlight-color: transparent;
-        }
+<style>
+:root {
+    --bg:#0f172a; --card:#1e293b; --text:#f8fafc; --muted:#94a3b8;
+    --border:#334155; --nav:80px;
+    --anat:#f43f5e; --phy:#22c55e; --bio:#eab308; --primary:#3b82f6;
+}
+body {
+    margin:0; font-family:system-ui,-apple-system; background:var(--bg);
+    color:var(--text); padding-bottom:calc(var(--nav) + 20px);
+}
+.header-wrapper {
+    position:sticky; top:0; z-index:100;
+    background:rgba(15,23,42,.95); border-bottom:1px solid var(--border);
+}
+.app-title { padding:16px 20px 6px; margin:0; font-size:1.4rem; font-weight:800; }
+.subject-tabs {
+    display:flex; gap:10px; padding:10px 20px 14px; overflow-x:auto;
+}
+.tab-btn {
+    padding:8px 16px; border-radius:20px; border:1px solid var(--border);
+    background:var(--card); color:var(--muted); font-weight:600; cursor:pointer;
+}
+.tab-btn.active { background:#fff; color:#000; }
+.tab-btn[data-sub="Anatomy"].active{background:var(--anat)}
+.tab-btn[data-sub="Physiology"].active{background:var(--phy)}
+.tab-btn[data-sub="Biochemistry"].active{background:var(--bio)}
 
-        /* --- HEADER --- */
-        .header-wrapper {
-            position: sticky; top: 0; z-index: 100;
-            background: rgba(15, 23, 42, 0.98); border-bottom: 1px solid var(--border);
-        }
-        .app-title { padding: 15px 20px 5px 20px; margin: 0; font-size: 1.4rem; font-weight: 800; }
+.container { padding:20px; }
+.date-divider {
+    margin:30px 0 12px; display:flex; gap:12px; align-items:center;
+    color:var(--muted); font-weight:800; font-size:.8rem;
+}
+.date-divider::after { content:''; flex:1; height:1px; background:var(--border); }
 
-        /* TABS (Updated Labels) */
-        .subject-tabs { display: flex; padding: 10px 20px 15px 20px; gap: 10px; overflow-x: auto; scrollbar-width: none; }
-        .subject-tabs::-webkit-scrollbar { display: none; }
-        
-        .tab-btn {
-            padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border);
-            background: var(--card-bg); color: var(--text-sub); font-size: 0.85rem; font-weight: 600;
-            white-space: nowrap; transition: 0.2s; cursor: pointer;
-        }
-        .tab-btn.active { background: var(--text-main); color: var(--bg); border-color: var(--text-main); }
-        
-        /* Active Colors */
-        .tab-btn[data-sub="Anatomy"].active { background: var(--anat); border-color: var(--anat); }
-        .tab-btn[data-sub="Physiology"].active { background: var(--phy); border-color: var(--phy); }
-        .tab-btn[data-sub="Biochemistry"].active { background: var(--bio); border-color: var(--bio); }
+.task-card {
+    display:flex; background:var(--card); border:1px solid var(--border);
+    border-radius:16px; margin-bottom:12px; overflow:hidden;
+}
+.card-strip { width:5px; }
+.task-card[data-sub="Anatomy"] .card-strip{background:var(--anat)}
+.task-card[data-sub="Physiology"] .card-strip{background:var(--phy)}
+.task-card[data-sub="Biochemistry"] .card-strip{background:var(--bio)}
 
-        /* --- FEED --- */
-        .container { padding: 20px; min-height: 60vh; }
-        
-        /* CLEAN HEADER */
-        .date-divider {
-            font-size: 0.85rem; font-weight: 800; color: var(--text-sub); margin: 30px 0 12px 0;
-            display: flex; align-items: center; gap: 15px; text-transform: uppercase; letter-spacing: 1px;
-        }
-        .date-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+.card-body { flex:1; padding:14px; }
+.badge {
+    font-size:.65rem; font-weight:800; text-transform:uppercase;
+    padding:3px 6px; border-radius:4px; display:inline-block;
+}
+.task-card[data-sub="Anatomy"] .badge{color:var(--anat); background:rgba(244,63,94,.2)}
+.task-card[data-sub="Physiology"] .badge{color:var(--phy); background:rgba(34,197,94,.2)}
+.task-card[data-sub="Biochemistry"] .badge{color:var(--bio); background:rgba(234,179,8,.2)}
 
-        /* CARD */
-        .task-card {
-            background: var(--card-bg); border-radius: 16px; margin-bottom: 12px;
-            border: 1px solid var(--border); display: flex; position: relative; overflow: hidden; 
-        }
-        .task-card:active { transform: scale(0.98); }
-        
-        /* Left Color Strip */
-        .card-strip { width: 5px; }
-        .task-card[data-sub="Anatomy"] .card-strip { background: var(--anat); }
-        .task-card[data-sub="Physiology"] .card-strip { background: var(--phy); }
-        .task-card[data-sub="Biochemistry"] .card-strip { background: var(--bio); }
-        
-        /* Default fallback */
-        .card-strip { background: var(--border); } 
+.task-title { margin:6px 0 0; font-size:1rem; font-weight:600; }
 
-        .card-body { flex: 1; padding: 15px; display: flex; flex-direction: column; justify-content: center; }
-        
-        .badge {
-            display: inline-block; font-size: 0.65rem; font-weight: 800; text-transform: uppercase;
-            padding: 3px 6px; border-radius: 4px; margin-bottom: 6px; width: fit-content;
-        }
-        .task-card[data-sub="Anatomy"] .badge { background: rgba(244, 63, 94, 0.2); color: var(--anat); }
-        .task-card[data-sub="Physiology"] .badge { background: rgba(34, 197, 94, 0.2); color: var(--phy); }
-        .task-card[data-sub="Biochemistry"] .badge { background: rgba(234, 179, 8, 0.2); color: var(--bio); }
+.card-action { padding:0 14px; display:flex; align-items:center; }
+.check-btn {
+    width:28px; height:28px; border-radius:50%;
+    border:2px solid var(--border); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+}
+.task-card.done { opacity:.5; }
+.task-card.done .check-btn {
+    background:var(--phy); border-color:var(--phy); color:#000;
+}
 
-        .task-title { margin: 0; font-size: 1rem; font-weight: 600; line-height: 1.4; color: var(--text-main); }
+.nav-bar {
+    position:fixed; bottom:0; left:0; right:0; height:var(--nav);
+    display:flex; background:rgba(15,23,42,.95); border-top:1px solid var(--border);
+}
+.nav-item {
+    flex:1; background:none; border:none; color:var(--muted);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-weight:600; cursor:pointer;
+}
+.nav-item.active { color:var(--text); }
+.nav-icon { font-size:1.4rem; }
 
-        /* Check Button */
-        .card-action { padding: 0 15px; display: flex; align-items: center; justify-content: center; }
-        .check-btn {
-            width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border);
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-        }
-        
-        /* Done State */
-        .task-card.done { opacity: 0.5; }
-        .task-card.done .check-btn { background: var(--phy); border-color: var(--phy); color: black; box-shadow: 0 0 8px rgba(34, 197, 94, 0.4); }
+.view-section { display:none; }
+.view-section.active { display:block; }
 
-        /* --- CALENDAR --- */
-        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .cal-btn { background: var(--card-bg); border: 1px solid var(--border); padding: 8px 14px; border-radius: 8px; color: white; cursor: pointer; }
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
-        
-        .cal-day {
-            aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 0.9rem; border-radius: 10px; background: var(--card-bg); border: 1px solid transparent; cursor: pointer;
-        }
-        .cal-day.today { border: 2px solid var(--primary); color: var(--primary); font-weight: 800; }
-        
-        /* THE DOTS */
-        .cal-dots { display: flex; gap: 3px; margin-top: 4px; }
-        .status-dot { width: 5px; height: 5px; border-radius: 50%; }
-        .status-dot.red { background: var(--anat); box-shadow: 0 0 4px var(--anat); }
-        .status-dot.green { background: var(--phy); box-shadow: 0 0 4px var(--phy); }
+.cal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+.cal-btn {
+    background:var(--card); border:1px solid var(--border);
+    color:#fff; padding:6px 12px; border-radius:8px;
+}
+.cal-grid {
+    display:grid; grid-template-columns:repeat(7,1fr); gap:6px; text-align:center;
+}
+.cal-day {
+    aspect-ratio:1; background:var(--card); border-radius:10px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+}
+.cal-day.today { border:2px solid var(--primary); color:var(--primary); font-weight:800; }
+.cal-dots { display:flex; gap:4px; margin-top:4px; }
+.status-dot { width:6px; height:6px; border-radius:50%; }
+.red{background:var(--anat)} .green{background:var(--phy)}
 
-        /* --- NAV --- */
-        .nav-bar {
-            position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-height);
-            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border);
-            display: flex; justify-content: space-around; align-items: center; z-index: 200;
-        }
-        .nav-item { flex: 1; background: none; border: none; display: flex; flex-direction: column; align-items: center; color: var(--text-sub); font-size: 0.75rem; font-weight: 600; cursor: pointer; }
-        .nav-icon { font-size: 1.5rem; margin-bottom: 5px; opacity: 0.6; }
-        .nav-item.active { color: var(--text-main); }
-        .nav-item.active .nav-icon { opacity: 1; color: var(--primary); }
-
-        .view-section { display: none; }
-        .view-section.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .loading { text-align: center; padding: 60px; color: var(--text-sub); }
-        .reset-btn { text-align: center; padding: 12px; background: var(--card-bg); margin-bottom: 20px; border-radius: 10px; border: 1px solid var(--border); cursor: pointer; font-weight: 600; }
-    </style>
+.loading { text-align:center; padding:60px; color:var(--muted); }
+</style>
 </head>
+
 <body>
 
-    <div class="header-wrapper">
-        <h1 class="app-title" id="page-title">My Feed</h1>
-        <div class="subject-tabs" id="subject-tabs">
-            <button class="tab-btn active" onclick="filterSubject('All', this)">All</button>
-            <button class="tab-btn" data-sub="Anatomy" onclick="filterSubject('Anatomy', this)">Anatomy</button>
-            <button class="tab-btn" data-sub="Physiology" onclick="filterSubject('Physiology', this)">Physiology</button>
-            <button class="tab-btn" data-sub="Biochemistry" onclick="filterSubject('Biochemistry', this)">Biochemistry</button>
+<div class="header-wrapper">
+<h1 class="app-title" id="page-title">My Feed</h1>
+<div class="subject-tabs">
+<button class="tab-btn active" onclick="filterSubject('All',this)">All</button>
+<button class="tab-btn" data-sub="Anatomy" onclick="filterSubject('Anatomy',this)">Anatomy</button>
+<button class="tab-btn" data-sub="Physiology" onclick="filterSubject('Physiology',this)">Physiology</button>
+<button class="tab-btn" data-sub="Biochemistry" onclick="filterSubject('Biochemistry',this)">Biochemistry</button>
+</div>
+</div>
+
+<div id="view-home" class="view-section active">
+<div class="container"><div id="feed" class="loading">Syncing…</div></div>
+</div>
+
+<div id="view-calendar" class="view-section">
+<div class="container">
+<div class="cal-header">
+<button class="cal-btn" onclick="changeMonth(-1)">❮</button>
+<span id="cal-title"></span>
+<button class="cal-btn" onclick="changeMonth(1)">❯</button>
+</div>
+<div class="cal-grid" style="opacity:.6;font-size:.8rem">
+<div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+</div>
+<div id="cal-days" class="cal-grid"></div>
+</div>
+</div>
+
+<div class="nav-bar">
+<button class="nav-item active" onclick="switchView('home',this)">
+<span class="nav-icon">⚡</span>Timeline
+</button>
+<button class="nav-item" onclick="switchView('calendar',this)">
+<span class="nav-icon">📅</span>Calendar
+</button>
+</div>
+
+<script>
+const SHEET_URL="PASTE_YOUR_GOOGLE_SHEET_CSV_LINK_HERE";
+let allData=[],currentSubject='All',currentMonth=new Date();
+
+const clean=s=>s? s.replace(/^"|"$/g,'').trim():'';
+
+function normalizeDate(s){
+    s=clean(s); if(!s) return null;
+    if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    const d=new Date(s); if(!isNaN(d)) return d.toISOString().split('T')[0];
+    return null;
+}
+
+function parseCSV(txt){
+    return txt.split('\n').slice(1).map(r=>{
+        if(!r.trim()) return null;
+        const c=r.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g)||r.split(',');
+        if(c.length<4) return null;
+
+        const id=clean(c[0]);
+        const date=normalizeDate(c[1]);
+        if(!date) return null;
+
+        let subject=clean(c[2]);
+        if(subject.includes('Anatomy')) subject='Anatomy';
+        else if(subject.includes('Physiology')) subject='Physiology';
+        else if(subject.includes('Biochemistry')) subject='Biochemistry';
+        else return null;
+
+        let topic=clean(c.slice(3).join(' '));
+        topic=topic.replace(/^\d{4}-\d{2}-\d{2}\s*/,'');
+
+        return {id,date,subject,topic};
+    }).filter(Boolean);
+}
+
+async function init(){
+    const res=await fetch(SHEET_URL);
+    allData=parseCSV(await res.text());
+    renderFeed(); renderCalendar();
+}
+
+function renderFeed(){
+    const el=document.getElementById('feed'); el.innerHTML='';
+    let data=allData;
+    if(currentSubject!=='All') data=data.filter(d=>d.subject===currentSubject);
+    data.sort((a,b)=>new Date(b.date)-new Date(a.date));
+    if(!data.length){el.innerHTML=`<div class="loading">No tasks found</div>`;return;}
+    let last='';
+    data.forEach(t=>{
+        const d=new Date(t.date+'T00:00:00');
+        const ds=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long'});
+        if(ds!==last){el.innerHTML+=`<div class="date-divider">${ds}</div>`; last=ds;}
+        const done=localStorage.getItem(t.id);
+        el.innerHTML+=`
+        <div class="task-card ${done?'done':''}" data-sub="${t.subject}">
+        <div class="card-strip"></div>
+        <div class="card-body">
+        <span class="badge">${t.subject}</span>
+        <div class="task-title">${t.topic}</div>
         </div>
-    </div>
+        <div class="card-action">
+        <div class="check-btn" onclick="toggle('${t.id}')">${done?'✓':''}</div>
+        </div></div>`;
+    });
+}
 
-    <div id="view-home" class="view-section active">
-        <div class="container">
-            <div id="reset-filter" class="reset-btn" style="display:none" onclick="clearDateFilter()">
-                ← Show All Dates
-            </div>
-            <div id="feed-container">
-                <div class="loading">Syncing...</div>
-            </div>
-        </div>
-    </div>
+function renderCalendar(){
+    const grid=document.getElementById('cal-days'); grid.innerHTML='';
+    const y=currentMonth.getFullYear(), m=currentMonth.getMonth();
+    document.getElementById('cal-title').innerText=
+        currentMonth.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    const first=new Date(y,m,1).getDay();
+    const days=new Date(y,m+1,0).getDate();
+    for(let i=0;i<first;i++) grid.innerHTML+='<div></div>';
+    for(let d=1;d<=days;d++){
+        const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        let tasks=allData.filter(t=>t.date===ds);
+        if(currentSubject!=='All') tasks=tasks.filter(t=>t.subject===currentSubject);
+        const done=tasks.length && tasks.every(t=>localStorage.getItem(t.id));
+        grid.innerHTML+=`
+        <div class="cal-day">
+        ${d}
+        ${tasks.length?`<div class="cal-dots"><div class="status-dot ${done?'green':'red'}"></div></div>`:''}
+        </div>`;
+    }
+}
 
-    <div id="view-calendar" class="view-section">
-        <div class="container">
-            <div class="cal-header">
-                <button class="cal-btn" onclick="changeMonth(-1)">❮</button>
-                <span id="cal-month-title" style="font-weight:800; font-size:1.2rem;"></span>
-                <button class="cal-btn" onclick="changeMonth(1)">❯</button>
-            </div>
-            <div class="cal-grid" style="margin-bottom:15px; opacity:0.6; font-size:0.8rem;">
-                <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
-            </div>
-            <div id="cal-days" class="cal-grid"></div>
-            <div style="text-align:center; margin-top:30px; font-size:0.8rem; color:var(--text-sub);">
-                <span style="color:var(--anat)">●</span> Pending &nbsp; <span style="color:var(--phy)">●</span> Done
-            </div>
-        </div>
-    </div>
-
-    <div class="nav-bar">
-        <button class="nav-item active" onclick="switchView('home', this)">
-            <span class="nav-icon">⚡</span> Timeline
-        </button>
-        <button class="nav-item" onclick="switchView('calendar', this)">
-            <span class="nav-icon">📅</span> Calendar
-        </button>
-    </div>
-
-    <script>
-        // ==========================================
-        //  👇 YOUR LINK 👇
-        // ==========================================
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREP7TsehrrFKgBrYNgyJyEc_56SWhnuXWydOyDIvjKGVwC6USsHzNdC13AlojDBuSmvi1D2H9HEudp/pub?output=csv";
-        
-        let allData = [];
-        let currentSubject = 'All';
-        let currentDateFilter = null;
-        let currentCalMonth = new Date();
-
-        async function init() {
-            try {
-                const res = await fetch(SHEET_URL);
-                const txt = await res.text();
-                allData = parseCSV(txt);
-                renderFeed();
-                renderCalendar();
-            } catch (e) {
-                document.getElementById('feed-container').innerHTML = `<div class="loading">⚠️ Error connecting to Sheet</div>`;
-            }
-        }
-
-        // --- NUCLEAR CLEANER FUNCTION ---
-        // Removes quotes, spaces, and garbage from CSV cells
-        function clean(str) {
-            if (!str) return '';
-            return str.replace(/^"|"$/g, '').trim();
-        }
-
-        // --- DATE NORMALIZER ---
-        // Forces everything to YYYY-MM-DD
-        function normalizeDate(dateStr) {
-            let s = clean(dateStr);
-            if (!s) return null;
-
-            // Handle YYYY-MM-DD (Default)
-            if (s.match(/^\d{4}-\d{2}-\d{2}$/)) return s;
-
-            // Handle DD/MM/YYYY
-            if (s.includes('/')) {
-                const p = s.split('/');
-                if (p[0].length <= 2 && p[2].length === 4) {
-                    return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
-                }
-            }
-
-            // Handle text (Jan 15, 2026)
-            const d = new Date(s);
-            if (!isNaN(d)) return d.toISOString().split('T')[0];
-
-            return null;
-        }
-
-        function parseCSV(text) {
-            const rows = text.split('\n').slice(1);
-            return rows.map(r => {
-                if(!r.trim()) return null;
-                
-                // Advanced split that ignores commas inside quotes
-                const c = r.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || r.split(',');
-                if(c.length < 4) return null;
-
-                const id = clean(c[0]);
-                const rawDate = clean(c[1]);
-                const subject = clean(c[2]); // This ensures "Physiology" matches perfectly
-                const topic = clean(c.slice(3).join(' ')); // Join rest in case of extra commas
-
-                const date = normalizeDate(rawDate);
-                if (!date) return null;
-
-                return { id, date, subject, topic };
-            }).filter(x => x);
-        }
-
-        // --- RENDER FEED ---
-        function renderFeed() {
-            const container = document.getElementById('feed-container');
-            container.innerHTML = '';
-            
-            let data = allData;
-            // Strict Filter
-            if (currentSubject !== 'All') data = data.filter(d => d.subject === currentSubject);
-            if (currentDateFilter) data = data.filter(d => d.date === currentDateFilter);
-
-            data.sort((a,b) => new Date(b.date) - new Date(a.date));
-
-            if(data.length === 0) {
-                container.innerHTML = `<div class="loading">No ${currentSubject} tasks found.</div>`;
-                return;
-            }
-
-            let lastDate = '';
-            data.forEach(task => {
-                // Formatting Date Header
-                const d = new Date(task.date + 'T00:00:00'); // Force Local Time
-                const dateStr = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long' });
-
-                if (dateStr !== lastDate) {
-                    const h = document.createElement('div');
-                    h.className = 'date-divider';
-                    h.innerText = dateStr;
-                    container.appendChild(h);
-                    lastDate = dateStr;
-                }
-
-                const isDone = localStorage.getItem(task.id) === 'done';
-                
-                const div = document.createElement('div');
-                div.className = `task-card ${isDone ? 'done' : ''}`;
-                div.setAttribute('data-sub', task.subject);
-                
-                div.innerHTML = `
-                    <div class="card-strip"></div>
-                    <div class="card-body">
-                        <span class="badge">${task.subject}</span>
-                        <h3 class="task-title">${task.topic}</h3>
-                    </div>
-                    <div class="card-action">
-                        <div class="check-btn" onclick="toggleTask('${task.id}')">
-                            ${isDone ? '✓' : ''}
-                        </div>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        // --- RENDER CALENDAR ---
-        function renderCalendar() {
-            const grid = document.getElementById('cal-days');
-            const title = document.getElementById('cal-month-title');
-            grid.innerHTML = '';
-            
-            const year = currentCalMonth.getFullYear();
-            const month = currentCalMonth.getMonth();
-            title.innerText = currentCalMonth.toLocaleDateString('en-US', {month:'long', year:'numeric'});
-
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-            for(let i=0; i<firstDay; i++) grid.innerHTML += `<div></div>`;
-
-            for(let i=1; i<=daysInMonth; i++) {
-                const dayStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-                
-                // FILTER: Only show dots for current subject
-                let dayTasks = allData.filter(t => t.date === dayStr);
-                if(currentSubject !== 'All') dayTasks = dayTasks.filter(t => t.subject === currentSubject);
-
-                const el = document.createElement('div');
-                el.className = 'cal-day';
-                if(dayStr === new Date().toISOString().split('T')[0]) el.classList.add('today');
-                
-                el.innerText = i;
-
-                if(dayTasks.length > 0) {
-                    const allDone = dayTasks.every(t => localStorage.getItem(t.id) === 'done');
-                    const dot = document.createElement('div');
-                    dot.className = `status-dot ${allDone ? 'green' : 'red'}`;
-                    
-                    const dotWrap = document.createElement('div');
-                    dotWrap.className = 'cal-dots';
-                    dotWrap.appendChild(dot);
-                    
-                    el.appendChild(dotWrap);
-                    el.onclick = () => jumpToDate(dayStr);
-                }
-                grid.appendChild(el);
-            }
-        }
-
-        // --- LOGIC ---
-        function toggleTask(id) {
-            if(localStorage.getItem(id)) localStorage.removeItem(id);
-            else localStorage.setItem(id, 'done');
-            renderFeed(); renderCalendar();
-        }
-
-        function filterSubject(sub, btn) {
-            currentSubject = sub;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderFeed(); renderCalendar();
-        }
-
-        function jumpToDate(dateStr) {
-            currentDateFilter = dateStr;
-            document.getElementById('reset-filter').style.display = 'block';
-            switchView('home', document.querySelector('.nav-item:first-child'));
-            renderFeed();
-        }
-
-        function clearDateFilter() {
-            currentDateFilter = null;
-            document.getElementById('reset-filter').style.display = 'none';
-            renderFeed();
-        }
-
-        function changeMonth(d) {
-            currentCalMonth.setMonth(currentCalMonth.getMonth()+d);
-            renderCalendar();
-        }
-
-        function switchView(view, btn) {
-            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-            document.getElementById(`view-${view}`).classList.add('active');
-            
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            document.getElementById('subject-tabs').style.display = view === 'home' ? 'flex' : 'none';
-            document.getElementById('page-title').innerText = view === 'home' ? 'My Feed' : 'Calendar';
-        }
-
-        init();
-    </script>
+function toggle(id){
+    localStorage.getItem(id)?localStorage.removeItem(id):localStorage.setItem(id,'1');
+    renderFeed(); renderCalendar();
+}
+function filterSubject(s,b){
+    currentSubject=s;
+    document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    renderFeed(); renderCalendar();
+}
+function changeMonth(n){currentMonth.setMonth(currentMonth.getMonth()+n); renderCalendar();}
+function switchView(v,b){
+    document.querySelectorAll('.view-section').forEach(x=>x.classList.remove('active'));
+    document.getElementById('view-'+v).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('page-title').innerText=v==='home'?'My Feed':'Calendar';
+}
+init();
+</script>
 </body>
 </html>
