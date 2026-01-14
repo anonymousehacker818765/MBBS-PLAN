@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MBBS Tracker</title>
+    <title>MBBS Tracker V8</title>
     <style>
-        /* --- THEME --- */
+        /* --- THEME & VARS --- */
         :root {
             --primary: #2563eb;
             --bg: #f8fafc;
@@ -15,7 +15,11 @@
             --border: #e2e8f0;
             --nav-height: 70px;
             
-            /* Subjects */
+            /* Status Colors */
+            --status-pending: #ef4444; /* Red */
+            --status-done: #22c55e;    /* Green */
+            
+            /* Subject Colors */
             --col-anat: #ef4444; 
             --col-phy: #22c55e;
             --col-bio: #eab308;
@@ -25,7 +29,7 @@
             :root { --bg: #0f172a; --card: #1e293b; --text-main: #f1f5f9; --text-sub: #94a3b8; --border: #334155; }
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: var(--bg); color: var(--text-main); margin: 0; 
             padding-bottom: calc(var(--nav-height) + 30px); -webkit-tap-highlight-color: transparent;
         }
@@ -33,21 +37,23 @@
         /* --- HEADER --- */
         .header-wrapper {
             position: sticky; top: 0; z-index: 100;
-            background: rgba(var(--card), 0.95); backdrop-filter: blur(10px);
+            background: rgba(var(--card), 0.96); backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border);
+            box-shadow: 0 4px 20px -10px rgba(0,0,0,0.05);
         }
         .header-top { padding: 15px 20px 5px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .app-title { margin: 0; font-size: 1.3rem; font-weight: 800; letter-spacing: -0.5px; }
-        
+        .app-title { margin: 0; font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; }
+
         /* TABS */
         .subject-tabs { display: flex; padding: 10px 15px 15px 15px; gap: 8px; overflow-x: auto; scrollbar-width: none; }
         .subject-tabs::-webkit-scrollbar { display: none; }
+        
         .tab-btn {
             padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border);
-            background: var(--card); color: var(--text-sub); font-size: 0.8rem; font-weight: 700;
+            background: var(--card); color: var(--text-sub); font-size: 0.85rem; font-weight: 700;
             white-space: nowrap; transition: 0.2s;
         }
-        .tab-btn.active { background: var(--text-main); color: var(--bg); border-color: var(--text-main); }
+        .tab-btn.active { background: var(--text-main); color: var(--bg); border-color: var(--text-main); transform: scale(1.02); }
         
         /* Subject Active Colors */
         .tab-btn[data-sub="Anatomy"].active { background: var(--col-anat); border-color: var(--col-anat); color: white; }
@@ -55,86 +61,110 @@
         .tab-btn[data-sub="Biochemistry"].active { background: var(--col-bio); border-color: var(--col-bio); color: white; }
 
         /* --- FEED --- */
-        .container { padding: 15px; }
+        .container { padding: 15px; min-height: 60vh; }
         
+        /* The Date Header - Clean & Bold */
         .date-divider {
-            font-size: 0.75rem; font-weight: 800; color: var(--text-sub); margin: 25px 0 10px 0;
-            display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px;
+            font-size: 0.8rem; font-weight: 800; color: var(--text-sub); margin: 30px 0 12px 0;
+            display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1.2px;
         }
         .date-divider::after { content:''; flex:1; height:1px; background:var(--border); }
 
-        .task-card {
-            background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 12px;
-            border: 1px solid var(--border); display: flex; align-items: center;
-            position: relative; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        /* "Show All" Button (Hidden by default) */
+        .reset-date-btn {
+            background: var(--text-main); color: var(--bg); padding: 8px 16px; border-radius: 8px;
+            text-align: center; margin: 10px 0; font-weight: bold; cursor: pointer; display: none;
         }
-        /* Left Color Bar */
-        .task-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--border); }
+
+        .task-card {
+            background: var(--card); border-radius: 16px; padding: 18px; margin-bottom: 12px;
+            border: 1px solid var(--border); display: flex; align-items: center;
+            position: relative; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: transform 0.1s;
+        }
+        .task-card:active { transform: scale(0.98); }
+        
+        /* Subject Color Strip */
+        .task-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--border); }
         .task-card[data-sub="Anatomy"]::before { background: var(--col-anat); }
         .task-card[data-sub="Physiology"]::before { background: var(--col-phy); }
         .task-card[data-sub="Biochemistry"]::before { background: var(--col-bio); }
 
-        .task-card.done { opacity: 0.5; background: var(--bg); border-color: transparent; box-shadow: none; }
+        .task-card.done { opacity: 0.6; background: var(--bg); border-color: transparent; box-shadow: none; }
         
-        .task-content { flex: 1; padding-left: 12px; }
-        .task-title { margin: 0; font-size: 1rem; font-weight: 600; line-height: 1.3; }
-        .task-meta { font-size: 0.75rem; color: var(--text-sub); margin-top: 5px; display: flex; gap: 8px; align-items: center; }
+        .task-content { flex: 1; padding-left: 15px; }
+        .task-title { margin: 0; font-size: 1.05rem; font-weight: 600; line-height: 1.35; }
+        .task-meta { font-size: 0.75rem; color: var(--text-sub); margin-top: 6px; font-weight: 500; display: flex; gap: 8px; align-items: center;}
         
-        .type-badge { background: var(--border); padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.65rem; }
+        .type-badge { background: var(--border); padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; text-transform: uppercase;}
 
         .check-circle {
-            width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border);
+            width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border);
             display: flex; align-items: center; justify-content: center; transition: 0.2s;
         }
-        .task-card.done .check-circle { background: var(--primary); border-color: var(--primary); color: white; font-size: 14px; }
+        .task-card.done .check-circle { background: var(--status-done); border-color: var(--status-done); color: white; }
 
         /* --- CALENDAR --- */
-        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .cal-btn { background: var(--card); border: 1px solid var(--border); padding: 8px 14px; border-radius: 8px; font-weight: bold; }
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding: 0 10px; }
+        .cal-btn { background: var(--card); border: 1px solid var(--border); padding: 8px 16px; border-radius: 10px; font-weight: bold; cursor: pointer;}
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
+        
         .cal-day {
-            aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
-            font-size: 0.9rem; border-radius: 10px; position: relative; background: var(--card); border: 1px solid transparent;
+            aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: 0.95rem; border-radius: 12px; position: relative; background: var(--card); border: 1px solid transparent;
+            cursor: pointer; transition: 0.1s;
         }
-        .cal-day.today { border-color: var(--primary); color: var(--primary); font-weight: 800; }
-        .cal-day.selected { background: var(--primary); color: white; border-color: var(--primary); }
-        .cal-dots { position: absolute; bottom: 5px; display: flex; gap: 3px; }
-        .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text-sub); }
-        .dot.Anatomy { background: var(--col-anat); } .dot.Physiology { background: var(--col-phy); } .dot.Biochemistry { background: var(--col-bio); }
+        .cal-day:active { transform: scale(0.9); background: var(--border); }
+        .cal-day.today { border: 2px solid var(--primary); color: var(--primary); font-weight: 800; }
+        
+        /* DOTS Logic */
+        .status-dot {
+            width: 6px; height: 6px; border-radius: 50%; margin-top: 4px;
+        }
+        .status-dot.red { background: var(--status-pending); box-shadow: 0 0 4px var(--status-pending); }
+        .status-dot.green { background: var(--status-done); }
 
-        /* --- NAV --- */
+        /* --- BOTTOM NAV --- */
         .nav-bar {
             position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-height);
             background: var(--card); border-top: 1px solid var(--border);
             display: flex; justify-content: space-around; align-items: center; z-index: 200;
         }
-        .nav-item { flex: 1; background: none; border: none; display: flex; flex-direction: column; align-items: center; color: var(--text-sub); font-size: 0.7rem; font-weight: 600; }
-        .nav-icon { font-size: 1.5rem; margin-bottom: 4px; }
+        .nav-item { flex: 1; background: none; border: none; display: flex; flex-direction: column; align-items: center; color: var(--text-sub); font-size: 0.7rem; font-weight: 600; cursor: pointer; }
+        .nav-icon { font-size: 1.6rem; margin-bottom: 4px; transition: 0.2s; }
         .nav-item.active { color: var(--primary); }
+        .nav-item.active .nav-icon { transform: translateY(-2px); }
 
         .view-section { display: none; }
         .view-section.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .loading { text-align: center; padding: 60px; color: var(--text-sub); }
     </style>
 </head>
 <body>
 
     <div class="header-wrapper">
         <div class="header-top">
-            <h1 class="app-title" id="page-title">Timeline</h1>
+            <h1 class="app-title" id="page-title">My Feed</h1>
         </div>
         
         <div class="subject-tabs" id="subject-tabs">
-            <button class="tab-btn active" onclick="filterHome('All', this)">All</button>
-            <button class="tab-btn" data-sub="Anatomy" onclick="filterHome('Anatomy', this)">Anatomy</button>
-            <button class="tab-btn" data-sub="Physiology" onclick="filterHome('Physiology', this)">Physio</button>
-            <button class="tab-btn" data-sub="Biochemistry" onclick="filterHome('Biochemistry', this)">Biochem</button>
+            <button class="tab-btn active" onclick="filterSubject('All', this)">All</button>
+            <button class="tab-btn" data-sub="Anatomy" onclick="filterSubject('Anatomy', this)">Anatomy</button>
+            <button class="tab-btn" data-sub="Physiology" onclick="filterSubject('Physiology', this)">Physio</button>
+            <button class="tab-btn" data-sub="Biochemistry" onclick="filterSubject('Biochemistry', this)">Biochem</button>
         </div>
     </div>
 
     <div id="view-home" class="view-section active">
-        <div id="feed-container" class="container">
-            <div style="text-align:center; padding:50px; color:#64748b;">Syncing...</div>
+        <div class="container">
+            <div id="reset-date-btn" class="reset-date-btn" onclick="clearDateFilter()">
+                ← Show All Dates
+            </div>
+            
+            <div id="feed-container">
+                <div class="loading">Syncing with Sheet...</div>
+            </div>
         </div>
     </div>
 
@@ -142,14 +172,18 @@
         <div class="container">
             <div class="cal-header">
                 <button class="cal-btn" onclick="changeMonth(-1)">❮</button>
-                <span id="cal-month-title" style="font-weight:800; font-size:1.1rem;"></span>
+                <span id="cal-month-title" style="font-weight:800; font-size:1.2rem;"></span>
                 <button class="cal-btn" onclick="changeMonth(1)">❯</button>
             </div>
-            <div class="cal-grid" style="margin-bottom:10px; opacity:0.5; font-size:0.7rem;">
+            <div class="cal-grid" style="margin-bottom:10px; opacity:0.5; font-size:0.75rem;">
                 <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
             </div>
             <div id="cal-days" class="cal-grid"></div>
-            <div id="cal-tasks-list" style="margin-top:20px;"></div>
+            
+            <p style="text-align:center; color:var(--text-sub); font-size:0.8rem; margin-top:30px;">
+                <span style="color:var(--status-pending)">●</span> Pending &nbsp;&nbsp; 
+                <span style="color:var(--status-done)">●</span> Done
+            </p>
         </div>
     </div>
 
@@ -164,14 +198,17 @@
 
     <script>
         // ==========================================
-        //  👇 YOUR LINK IS HERE 👇
+        //  👇 YOUR GOOGLE SHEET LINK IS HERE 👇
         // ==========================================
         const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREP7TsehrrFKgBrYNgyJyEc_56SWhnuXWydOyDIvjKGVwC6USsHzNdC13AlojDBuSmvi1D2H9HEudp/pub?output=csv";
         
+        // State
         let allData = [];
-        let currentFilter = 'All';
-        let currentCalDate = new Date();
+        let currentSubject = 'All';
+        let currentDateFilter = null; // Used when jumping from Calendar
+        let currentCalMonth = new Date();
 
+        // 1. Initialize
         async function init() {
             try {
                 const res = await fetch(SHEET_URL);
@@ -181,33 +218,21 @@
                 renderCalendar();
             } catch (e) {
                 document.getElementById('feed-container').innerHTML = 
-                    `<div style="text-align:center; padding:50px;">Unable to load data.<br>Check internet.</div>`;
+                    `<div class="loading">❌ Connection Failed.<br>Check your internet.</div>`;
             }
         }
 
-        // --- SMART DATE PARSER ---
-        // Converts "14/01/2026" OR "2026-01-14" OR "Jan 14 2026" -> "2026-01-14"
+        // 2. Smart Parser (Fixes "Two Dates" Bug)
         function normalizeDate(input) {
             if(!input) return null;
-            let dateObj;
-            
-            // Check for DD/MM/YYYY format (common in sheets)
-            if (input.includes('/')) {
-                const parts = input.split('/');
-                if (parts[0].length === 2 && parts[1].length === 2) {
-                    // Assume DD/MM/YYYY
-                    dateObj = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-                }
-            } 
-            
-            if (!dateObj || isNaN(dateObj)) {
-                dateObj = new Date(input); // Try standard parser
+            // Handle DD/MM/YYYY
+            if (input.includes('/') && input.split('/')[0].length <= 2) {
+                const p = input.split('/');
+                return `${p[2]}-${p[1]}-${p[0]}`; // Convert to YYYY-MM-DD
             }
-
-            if (isNaN(dateObj)) return null;
-
-            // Return strictly YYYY-MM-DD for comparison
-            return dateObj.toISOString().split('T')[0];
+            // Handle standard formats
+            const d = new Date(input);
+            return isNaN(d) ? null : d.toISOString().split('T')[0];
         }
 
         function parseCSV(text) {
@@ -215,63 +240,69 @@
             return rows.map(r => {
                 if(!r.trim()) return null;
                 const c = r.split(',');
-                if(c.length < 4) return null; // Ensure we have enough columns
+                if(c.length < 4) return null;
                 
-                // Safe extraction
                 const id = c[0].trim();
                 const rawDate = c[1].trim();
-                const cleanDate = normalizeDate(rawDate); // Fix the date!
+                const cleanDate = normalizeDate(rawDate);
                 const subject = c[2].trim();
-                const topic = c.slice(3, c.length - 1).join(',').replace(/"/g, '').trim(); // Handle topic commas
-                const type = c[c.length - 1]?.trim() || ''; // Optional Type Column
+                const topic = c.slice(3, c.length - 1).join(',').replace(/"/g, '').trim();
+                const type = c.length > 4 ? c[c.length-1].trim() : ''; // Optional type
 
-                // Fallback for topic if 4 columns
                 const safeTopic = c.length === 4 ? c.slice(3).join(',').trim() : topic;
-                
-                if (!cleanDate) return null; // Skip invalid dates
 
+                if (!cleanDate) return null;
                 return { id, date: cleanDate, subject, topic: safeTopic, type };
             }).filter(x => x);
         }
 
-        // --- FEED ---
+        // 3. Render Feed
         function renderFeed() {
             const container = document.getElementById('feed-container');
             container.innerHTML = '';
             
-            let displayData = currentFilter === 'All' ? allData : allData.filter(d => d.subject === currentFilter);
-            displayData.sort((a,b) => new Date(b.date) - new Date(a.date));
+            // Filter: Subject AND Date (if set)
+            let data = allData;
+            if (currentSubject !== 'All') data = data.filter(d => d.subject === currentSubject);
+            if (currentDateFilter) data = data.filter(d => d.date === currentDateFilter);
 
-            if(displayData.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:40px; color:#94a3b8">No tasks found for ${currentFilter}.</div>`;
+            // Sort Newest First
+            data.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            if(data.length === 0) {
+                container.innerHTML = `<div class="loading">No ${currentSubject} tasks found.</div>`;
                 return;
             }
 
             let lastDate = '';
-            displayData.forEach(task => {
-                // Friendly Date Display (Wed, 14 Jan)
+            data.forEach(task => {
+                // Header Date Logic
                 const dObj = new Date(task.date);
-                const dStr = dObj.toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'});
+                const niceDate = dObj.toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'}); // Wed, 15 Jan
                 
-                if(dStr !== lastDate) {
-                    const h = document.createElement('div'); h.className='date-divider'; h.innerText=dStr;
-                    container.appendChild(h); lastDate = dStr;
+                // Show Header ONLY if date changed
+                if(niceDate !== lastDate) {
+                    const h = document.createElement('div'); 
+                    h.className = 'date-divider'; 
+                    h.innerText = niceDate;
+                    container.appendChild(h); 
+                    lastDate = niceDate;
                 }
+
                 const isDone = localStorage.getItem(task.id) === 'done';
                 const div = document.createElement('div');
                 div.className = `task-card ${isDone ? 'done' : ''}`;
                 div.setAttribute('data-sub', task.subject);
-                div.onclick = () => { toggleTask(task.id); renderFeed(); renderCalendar(); };
+                div.onclick = () => toggleTask(task.id);
                 
-                // Check if Type exists
-                const typeHtml = task.type ? `<span class="type-badge">${task.type}</span>` : '';
+                const typeBadge = task.type ? `<span class="type-badge">${task.type}</span>` : '';
 
                 div.innerHTML = `
                     <div class="task-content">
                         <div class="task-title">${task.topic}</div>
                         <div class="task-meta">
                             <span>${task.subject}</span>
-                            ${typeHtml}
+                            ${typeBadge}
                         </div>
                     </div>
                     <div class="check-circle">${isDone ? '✔' : ''}</div>
@@ -280,87 +311,106 @@
             });
         }
 
-        function filterHome(sub, btn) {
-            currentFilter = sub;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderFeed();
-        }
-
-        function toggleTask(id) {
-            if(localStorage.getItem(id)) localStorage.removeItem(id); else localStorage.setItem(id, 'done');
-        }
-
-        // --- CALENDAR ---
+        // 4. Calendar Logic (Traffic Lights)
         function renderCalendar() {
             const grid = document.getElementById('cal-days');
             const title = document.getElementById('cal-month-title');
             grid.innerHTML = '';
             
-            const year = currentCalDate.getFullYear();
-            const month = currentCalDate.getMonth();
-            title.innerText = currentCalDate.toLocaleDateString('en-US', {month:'long', year:'numeric'});
+            const year = currentCalMonth.getFullYear();
+            const month = currentCalMonth.getMonth();
+            title.innerText = currentCalMonth.toLocaleDateString('en-US', {month:'long', year:'numeric'});
 
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
 
+            // Empty Slots
             for(let i=0; i<firstDay; i++) grid.innerHTML += `<div></div>`;
 
+            // Days
             for(let i=1; i<=daysInMonth; i++) {
                 const dayStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
                 
-                // Compare with Normalized Dates
-                const dayTasks = allData.filter(t => t.date === dayStr);
-                const isToday = new Date().toISOString().split('T')[0] === dayStr;
+                // FILTER LOGIC: Only count tasks that match current SUBJECT
+                let dayTasks = allData.filter(t => t.date === dayStr);
+                if(currentSubject !== 'All') {
+                    dayTasks = dayTasks.filter(t => t.subject === currentSubject);
+                }
 
+                const isToday = new Date().toISOString().split('T')[0] === dayStr;
                 const el = document.createElement('div');
                 el.className = `cal-day ${isToday ? 'today' : ''}`;
                 el.innerText = i;
-                
+
+                // Traffic Light Logic
                 if(dayTasks.length > 0) {
-                    const dotsDiv = document.createElement('div'); dotsDiv.className = 'cal-dots';
-                    dayTasks.slice(0,3).forEach(t => {
-                        const dot = document.createElement('div'); dot.className = `dot ${t.subject}`;
-                        dotsDiv.appendChild(dot);
-                    });
-                    el.appendChild(dotsDiv);
+                    const allDone = dayTasks.every(t => localStorage.getItem(t.id) === 'done');
+                    const dot = document.createElement('div');
+                    dot.className = `status-dot ${allDone ? 'green' : 'red'}`;
+                    el.appendChild(dot);
+                    
+                    // Interaction: Jump to Date
+                    el.onclick = () => jumpToDate(dayStr);
                 }
-                el.onclick = () => showDayTasks(dayTasks, el);
+                
                 grid.appendChild(el);
             }
         }
 
-        function showDayTasks(tasks, el) {
-            document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('selected'));
-            el.classList.add('selected');
+        // 5. Interactions
+        function toggleTask(id) {
+            if(localStorage.getItem(id)) localStorage.removeItem(id); 
+            else localStorage.setItem(id, 'done');
             
-            const list = document.getElementById('cal-tasks-list');
-            list.innerHTML = '';
-            if(tasks.length === 0) { list.innerHTML = '<div style="text-align:center; color:#94a3b8; font-size:0.8rem">No tasks recorded for this day.</div>'; return; }
-
-            tasks.forEach(task => {
-                const isDone = localStorage.getItem(task.id) === 'done';
-                const div = document.createElement('div');
-                div.className = `task-card ${isDone ? 'done' : ''}`;
-                div.setAttribute('data-sub', task.subject);
-                div.onclick = () => { toggleTask(task.id); showDayTasks(tasks, el); renderFeed(); };
-                div.innerHTML = `<div class="task-content"><div class="task-title">${task.topic}</div></div><div class="check-circle">${isDone?'✔':''}</div>`;
-                list.appendChild(div);
-            });
+            // Refresh BOTH views to update dots immediately
+            renderFeed();
+            renderCalendar(); 
         }
 
-        function changeMonth(d) { currentCalDate.setMonth(currentCalDate.getMonth()+d); renderCalendar(); }
+        function filterSubject(sub, btn) {
+            currentSubject = sub;
+            // Update Tab UI
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Refresh Views
+            renderFeed();
+            renderCalendar(); // Update dots to match subject
+        }
+
+        function jumpToDate(dateStr) {
+            currentDateFilter = dateStr;
+            
+            // Show "Show All" button
+            document.getElementById('reset-date-btn').style.display = 'block';
+            
+            // Switch Tab
+            switchView('home', document.querySelector('.nav-item:first-child'));
+            
+            // Render specific date
+            renderFeed();
+        }
+
+        function clearDateFilter() {
+            currentDateFilter = null;
+            document.getElementById('reset-date-btn').style.display = 'none';
+            renderFeed();
+        }
+
+        function changeMonth(d) { 
+            currentCalMonth.setMonth(currentCalMonth.getMonth()+d); 
+            renderCalendar(); 
+        }
 
         function switchView(view, btn) {
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
             document.getElementById(`view-${view}`).classList.add('active');
             
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            btn.classList.add('active');
+            if(btn) btn.classList.add('active');
             
-            // Toggle Header Elements
-            document.getElementById('subject-tabs').style.display = view === 'home' ? 'flex' : 'none';
-            document.getElementById('page-title').innerText = view === 'home' ? 'Timeline' : 'Calendar';
+            // Logic: Hide tabs on calendar? User choice. Let's keep them so you can filter calendar dots.
+            document.getElementById('page-title').innerText = view === 'home' ? 'My Feed' : 'Overview';
         }
 
         init();
