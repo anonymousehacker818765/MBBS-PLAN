@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MBBS Ultimate</title>
+    <title>MBBS Tracker</title>
     <style>
-        /* --- THEME VARS --- */
+        /* --- THEME --- */
         :root {
             --primary: #2563eb;
             --bg: #f8fafc;
@@ -15,96 +15,92 @@
             --border: #e2e8f0;
             --nav-height: 70px;
             
-            /* Subject Colors */
+            /* Subjects */
             --col-anat: #ef4444; 
             --col-phy: #22c55e;
             --col-bio: #eab308;
+            --col-comm: #8b5cf6;
         }
         @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #0f172a; --card: #1e293b; --text-main: #f1f5f9; --text-sub: #94a3b8; --border: #334155;
-            }
+            :root { --bg: #0f172a; --card: #1e293b; --text-main: #f1f5f9; --text-sub: #94a3b8; --border: #334155; }
         }
         body {
-            font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text-main);
-            margin: 0; padding-bottom: calc(var(--nav-height) + 20px); -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg); color: var(--text-main); margin: 0; 
+            padding-bottom: calc(var(--nav-height) + 30px); -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- HEADER & TABS --- */
+        /* --- HEADER --- */
         .header-wrapper {
             position: sticky; top: 0; z-index: 100;
             background: rgba(var(--card), 0.95); backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border);
         }
-        .app-title { padding: 15px 20px 5px 20px; margin: 0; font-size: 1.2rem; font-weight: 800; }
+        .header-top { padding: 15px 20px 5px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .app-title { margin: 0; font-size: 1.3rem; font-weight: 800; letter-spacing: -0.5px; }
         
-        .subject-tabs {
-            display: flex; padding: 10px 15px 15px 15px; gap: 8px; overflow-x: auto;
-        }
+        /* TABS */
+        .subject-tabs { display: flex; padding: 10px 15px 15px 15px; gap: 8px; overflow-x: auto; scrollbar-width: none; }
         .subject-tabs::-webkit-scrollbar { display: none; }
-
         .tab-btn {
             padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border);
-            background: var(--card); color: var(--text-sub); font-size: 0.85rem; font-weight: 600;
+            background: var(--card); color: var(--text-sub); font-size: 0.8rem; font-weight: 700;
             white-space: nowrap; transition: 0.2s;
         }
         .tab-btn.active { background: var(--text-main); color: var(--bg); border-color: var(--text-main); }
         
-        /* Subject Specific Active States */
+        /* Subject Active Colors */
         .tab-btn[data-sub="Anatomy"].active { background: var(--col-anat); border-color: var(--col-anat); color: white; }
         .tab-btn[data-sub="Physiology"].active { background: var(--col-phy); border-color: var(--col-phy); color: white; }
         .tab-btn[data-sub="Biochemistry"].active { background: var(--col-bio); border-color: var(--col-bio); color: white; }
 
         /* --- FEED --- */
         .container { padding: 15px; }
+        
         .date-divider {
-            font-size: 0.8rem; font-weight: 700; color: var(--text-sub); margin: 25px 0 10px 5px;
-            display: flex; align-items: center; gap: 10px;
+            font-size: 0.75rem; font-weight: 800; color: var(--text-sub); margin: 25px 0 10px 0;
+            display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px;
         }
         .date-divider::after { content:''; flex:1; height:1px; background:var(--border); }
 
         .task-card {
-            background: var(--card); border-radius: 14px; padding: 16px; margin-bottom: 12px;
+            background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 12px;
             border: 1px solid var(--border); display: flex; align-items: center;
-            position: relative; overflow: hidden;
+            position: relative; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
-        .task-card::before {
-            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--border);
-        }
+        /* Left Color Bar */
+        .task-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--border); }
         .task-card[data-sub="Anatomy"]::before { background: var(--col-anat); }
         .task-card[data-sub="Physiology"]::before { background: var(--col-phy); }
         .task-card[data-sub="Biochemistry"]::before { background: var(--col-bio); }
+
+        .task-card.done { opacity: 0.5; background: var(--bg); border-color: transparent; box-shadow: none; }
         
-        .task-card.done { opacity: 0.6; background: var(--bg); }
-        .task-content { flex: 1; padding-left: 10px; }
-        .task-title { margin: 0; font-size: 1rem; font-weight: 600; }
-        .task-sub { font-size: 0.75rem; color: var(--text-sub); margin-top: 4px; }
+        .task-content { flex: 1; padding-left: 12px; }
+        .task-title { margin: 0; font-size: 1rem; font-weight: 600; line-height: 1.3; }
+        .task-meta { font-size: 0.75rem; color: var(--text-sub); margin-top: 5px; display: flex; gap: 8px; align-items: center; }
         
+        .type-badge { background: var(--border); padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.65rem; }
+
         .check-circle {
-            width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border);
-            display: flex; align-items: center; justify-content: center; color: transparent;
+            width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border);
+            display: flex; align-items: center; justify-content: center; transition: 0.2s;
         }
-        .task-card.done .check-circle { background: var(--primary); border-color: var(--primary); color: white; }
+        .task-card.done .check-circle { background: var(--primary); border-color: var(--primary); color: white; font-size: 14px; }
 
         /* --- CALENDAR --- */
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .cal-btn { background: none; border: 1px solid var(--border); padding: 5px 12px; border-radius: 8px; color: var(--text-main); }
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
-        
+        .cal-btn { background: var(--card); border: 1px solid var(--border); padding: 8px 14px; border-radius: 8px; font-weight: bold; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
         .cal-day {
             aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
-            font-size: 0.9rem; border-radius: 8px; position: relative;
-            background: var(--card); border: 1px solid transparent;
+            font-size: 0.9rem; border-radius: 10px; position: relative; background: var(--card); border: 1px solid transparent;
         }
-        .cal-day.today { border-color: var(--primary); color: var(--primary); font-weight: bold; }
-        .cal-day.selected { background: var(--primary); color: white; }
-        
-        /* Dots for tasks */
-        .cal-dots { position: absolute; bottom: 4px; display: flex; gap: 2px; }
+        .cal-day.today { border-color: var(--primary); color: var(--primary); font-weight: 800; }
+        .cal-day.selected { background: var(--primary); color: white; border-color: var(--primary); }
+        .cal-dots { position: absolute; bottom: 5px; display: flex; gap: 3px; }
         .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text-sub); }
-        .dot.Anatomy { background: var(--col-anat); }
-        .dot.Physiology { background: var(--col-phy); }
-        .dot.Biochemistry { background: var(--col-bio); }
+        .dot.Anatomy { background: var(--col-anat); } .dot.Physiology { background: var(--col-phy); } .dot.Biochemistry { background: var(--col-bio); }
 
         /* --- NAV --- */
         .nav-bar {
@@ -112,22 +108,22 @@
             background: var(--card); border-top: 1px solid var(--border);
             display: flex; justify-content: space-around; align-items: center; z-index: 200;
         }
-        .nav-item {
-            flex: 1; background: none; border: none; display: flex; flex-direction: column; align-items: center;
-            color: var(--text-sub); font-size: 0.7rem; font-weight: 600;
-        }
+        .nav-item { flex: 1; background: none; border: none; display: flex; flex-direction: column; align-items: center; color: var(--text-sub); font-size: 0.7rem; font-weight: 600; }
         .nav-icon { font-size: 1.5rem; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary); }
 
         .view-section { display: none; }
-        .view-section.active { display: block; animation: fade 0.3s; }
-        @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+        .view-section.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div class="header-wrapper">
-        <h1 class="app-title" id="page-title">Feed</h1>
+        <div class="header-top">
+            <h1 class="app-title" id="page-title">Timeline</h1>
+        </div>
+        
         <div class="subject-tabs" id="subject-tabs">
             <button class="tab-btn active" onclick="filterHome('All', this)">All</button>
             <button class="tab-btn" data-sub="Anatomy" onclick="filterHome('Anatomy', this)">Anatomy</button>
@@ -146,14 +142,13 @@
         <div class="container">
             <div class="cal-header">
                 <button class="cal-btn" onclick="changeMonth(-1)">❮</button>
-                <span id="cal-month-title" style="font-weight:bold"></span>
+                <span id="cal-month-title" style="font-weight:800; font-size:1.1rem;"></span>
                 <button class="cal-btn" onclick="changeMonth(1)">❯</button>
             </div>
-            <div class="cal-grid" style="margin-bottom:10px; opacity:0.6; font-size:0.8rem;">
+            <div class="cal-grid" style="margin-bottom:10px; opacity:0.5; font-size:0.7rem;">
                 <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
             </div>
             <div id="cal-days" class="cal-grid"></div>
-            
             <div id="cal-tasks-list" style="margin-top:20px;"></div>
         </div>
     </div>
@@ -185,8 +180,34 @@
                 renderFeed();
                 renderCalendar();
             } catch (e) {
-                document.getElementById('feed-container').innerHTML = "Error loading data";
+                document.getElementById('feed-container').innerHTML = 
+                    `<div style="text-align:center; padding:50px;">Unable to load data.<br>Check internet.</div>`;
             }
+        }
+
+        // --- SMART DATE PARSER ---
+        // Converts "14/01/2026" OR "2026-01-14" OR "Jan 14 2026" -> "2026-01-14"
+        function normalizeDate(input) {
+            if(!input) return null;
+            let dateObj;
+            
+            // Check for DD/MM/YYYY format (common in sheets)
+            if (input.includes('/')) {
+                const parts = input.split('/');
+                if (parts[0].length === 2 && parts[1].length === 2) {
+                    // Assume DD/MM/YYYY
+                    dateObj = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                }
+            } 
+            
+            if (!dateObj || isNaN(dateObj)) {
+                dateObj = new Date(input); // Try standard parser
+            }
+
+            if (isNaN(dateObj)) return null;
+
+            // Return strictly YYYY-MM-DD for comparison
+            return dateObj.toISOString().split('T')[0];
         }
 
         function parseCSV(text) {
@@ -194,13 +215,26 @@
             return rows.map(r => {
                 if(!r.trim()) return null;
                 const c = r.split(',');
-                if(c.length < 4) return null;
-                const topic = c.slice(3).join(',').replace(/"/g, '').trim();
-                return { id: c[0].trim(), date: c[1].trim(), subject: c[2].trim(), topic: topic };
+                if(c.length < 4) return null; // Ensure we have enough columns
+                
+                // Safe extraction
+                const id = c[0].trim();
+                const rawDate = c[1].trim();
+                const cleanDate = normalizeDate(rawDate); // Fix the date!
+                const subject = c[2].trim();
+                const topic = c.slice(3, c.length - 1).join(',').replace(/"/g, '').trim(); // Handle topic commas
+                const type = c[c.length - 1]?.trim() || ''; // Optional Type Column
+
+                // Fallback for topic if 4 columns
+                const safeTopic = c.length === 4 ? c.slice(3).join(',').trim() : topic;
+                
+                if (!cleanDate) return null; // Skip invalid dates
+
+                return { id, date: cleanDate, subject, topic: safeTopic, type };
             }).filter(x => x);
         }
 
-        // --- HOME FEED ---
+        // --- FEED ---
         function renderFeed() {
             const container = document.getElementById('feed-container');
             container.innerHTML = '';
@@ -209,13 +243,16 @@
             displayData.sort((a,b) => new Date(b.date) - new Date(a.date));
 
             if(displayData.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:40px; color:#94a3b8">No tasks found.</div>`;
+                container.innerHTML = `<div style="text-align:center; padding:40px; color:#94a3b8">No tasks found for ${currentFilter}.</div>`;
                 return;
             }
 
             let lastDate = '';
             displayData.forEach(task => {
-                const dStr = new Date(task.date).toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'});
+                // Friendly Date Display (Wed, 14 Jan)
+                const dObj = new Date(task.date);
+                const dStr = dObj.toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'});
+                
                 if(dStr !== lastDate) {
                     const h = document.createElement('div'); h.className='date-divider'; h.innerText=dStr;
                     container.appendChild(h); lastDate = dStr;
@@ -226,10 +263,16 @@
                 div.setAttribute('data-sub', task.subject);
                 div.onclick = () => { toggleTask(task.id); renderFeed(); renderCalendar(); };
                 
+                // Check if Type exists
+                const typeHtml = task.type ? `<span class="type-badge">${task.type}</span>` : '';
+
                 div.innerHTML = `
                     <div class="task-content">
                         <div class="task-title">${task.topic}</div>
-                        <div class="task-sub">${task.subject}</div>
+                        <div class="task-meta">
+                            <span>${task.subject}</span>
+                            ${typeHtml}
+                        </div>
                     </div>
                     <div class="check-circle">${isDone ? '✔' : ''}</div>
                 `;
@@ -265,25 +308,23 @@
 
             for(let i=1; i<=daysInMonth; i++) {
                 const dayStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                
+                // Compare with Normalized Dates
                 const dayTasks = allData.filter(t => t.date === dayStr);
-                const isToday = new Date().toDateString() === new Date(year, month, i).toDateString();
+                const isToday = new Date().toISOString().split('T')[0] === dayStr;
 
                 const el = document.createElement('div');
                 el.className = `cal-day ${isToday ? 'today' : ''}`;
                 el.innerText = i;
                 
-                // Dots
                 if(dayTasks.length > 0) {
                     const dotsDiv = document.createElement('div'); dotsDiv.className = 'cal-dots';
-                    // Show max 3 dots, colored by subject
                     dayTasks.slice(0,3).forEach(t => {
-                        const dot = document.createElement('div'); 
-                        dot.className = `dot ${t.subject}`;
+                        const dot = document.createElement('div'); dot.className = `dot ${t.subject}`;
                         dotsDiv.appendChild(dot);
                     });
                     el.appendChild(dotsDiv);
                 }
-                
                 el.onclick = () => showDayTasks(dayTasks, el);
                 grid.appendChild(el);
             }
@@ -295,14 +336,14 @@
             
             const list = document.getElementById('cal-tasks-list');
             list.innerHTML = '';
-            if(tasks.length === 0) { list.innerHTML = '<div style="text-align:center; color:#94a3b8">No classes.</div>'; return; }
+            if(tasks.length === 0) { list.innerHTML = '<div style="text-align:center; color:#94a3b8; font-size:0.8rem">No tasks recorded for this day.</div>'; return; }
 
             tasks.forEach(task => {
                 const isDone = localStorage.getItem(task.id) === 'done';
                 const div = document.createElement('div');
                 div.className = `task-card ${isDone ? 'done' : ''}`;
                 div.setAttribute('data-sub', task.subject);
-                div.onclick = () => { toggleTask(task.id); showDayTasks(tasks, el); renderFeed(); }; // update both views
+                div.onclick = () => { toggleTask(task.id); showDayTasks(tasks, el); renderFeed(); };
                 div.innerHTML = `<div class="task-content"><div class="task-title">${task.topic}</div></div><div class="check-circle">${isDone?'✔':''}</div>`;
                 list.appendChild(div);
             });
@@ -310,7 +351,6 @@
 
         function changeMonth(d) { currentCalDate.setMonth(currentCalDate.getMonth()+d); renderCalendar(); }
 
-        // --- NAV ---
         function switchView(view, btn) {
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
             document.getElementById(`view-${view}`).classList.add('active');
@@ -318,9 +358,9 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             btn.classList.add('active');
             
-            // Hide Tabs on Calendar
+            // Toggle Header Elements
             document.getElementById('subject-tabs').style.display = view === 'home' ? 'flex' : 'none';
-            document.getElementById('page-title').innerText = view === 'home' ? 'Feed' : 'Calendar';
+            document.getElementById('page-title').innerText = view === 'home' ? 'Timeline' : 'Calendar';
         }
 
         init();
