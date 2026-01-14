@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MBBS Tracker</title>
+    <style>
+        :root {
+            --primary: #2563eb;       
+            --success: #10b981;       
+            --warning: #f59e0b;       
+            --bg: #f1f5f9;            
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding-bottom: 40px; 
+        }
+        .header {
+            background: var(--card-bg);
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        h1 { margin: 0; font-size: 1.2rem; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; }
+        .stats { font-size: 0.8rem; font-weight: 600; color: var(--text-sub); }
+        .progress-container {
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #3b82f6);
+            width: 0%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .filters {
+            display: flex;
+            gap: 10px;
+            padding: 15px 20px 5px 20px;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch; 
+        }
+        .filters::-webkit-scrollbar { display: none; }
+        .filter-btn {
+            background: transparent;
+            border: 1px solid #cbd5e1;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-btn.active {
+            background: var(--text-main);
+            color: white;
+            border-color: var(--text-main);
+        }
+        .container { padding: 10px 15px; }
+        .date-header {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            font-weight: 700;
+            margin: 25px 0 10px 5px;
+        }
+        .task-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid transparent;
+            transition: transform 0.2s, border-color 0.3s;
+        }
+        .task-card:active { transform: scale(0.98); }
+        .task-card.status-done { border-left-color: var(--success); opacity: 0.8; }
+        .task-card.status-review { border-left-color: var(--warning); }
+        .task-card.status-pending { border-left-color: #cbd5e1; }
+        .task-content { flex: 1; padding-right: 15px; }
+        .subject-badge {
+            display: inline-block;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            background: #e0f2fe; color: #0369a1; 
+        }
+        .tag-Anatomy { background: #fee2e2; color: #991b1b; } 
+        .tag-Physiology { background: #dcfce7; color: #166534; } 
+        .tag-Biochemistry { background: #fef9c3; color: #854d0e; } 
+        .task-title { margin: 0; font-size: 1rem; font-weight: 600; line-height: 1.4; }
+        .actions { display: flex; gap: 8px; }
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            background: #f1f5f9;
+            transition: all 0.2s;
+        }
+        .status-done .btn-check { background: var(--success); color: white; }
+        .status-review .btn-flag { background: var(--warning); color: white; }
+        .loading { text-align: center; padding: 40px; color: var(--text-sub); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-top">
+            <h1>My MBBS Tracker</h1>
+            <div class="stats" id="progress-text">0% Complete</div>
+        </div>
+        <div class="progress-container">
+            <div class="progress-fill" id="progress-bar"></div>
+        </div>
+    </div>
+
+    <div class="filters">
+        <button class="filter-btn active" onclick="setFilter('all', this)">All Tasks</button>
+        <button class="filter-btn" onclick="setFilter('pending', this)">To Do</button>
+        <button class="filter-btn" onclick="setFilter('done', this)">Completed</button>
+    </div>
+
+    <div class="container" id="tracker-container">
+        <div class="loading">Loading your targets...</div>
+    </div>
+
+    <script>
+        // ==========================================
+        //  👇 PASTE YOUR GOOGLE SHEET LINK HERE 👇
+        // ==========================================
+        const SHEET_URL = "https://docs.google.com/spreadsheets/d/1pmd-P9rMLTZ-i0A4dFEmzFEpAvqWjs4SnGFLQo7lsHQ/edit?gid=1037775068#gid=1037775068"; 
+        // ==========================================
+
+        let allTasks = [];
+        let currentFilter = 'all';
+
+        async function init() {
+            try {
+                const response = await fetch(SHEET_URL);
+                const data = await response.text();
+                allTasks = parseCSV(data);
+                render();
+            } catch (error) {
+                document.getElementById('tracker-container').innerHTML = 
+                    '<p style="text-align:center; margin-top:50px; color:red;">⚠️ Error: Could not connect to Sheet.</p>';
+            }
+        }
+
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n');
+            const result = [];
+            for(let i = 1; i < lines.length; i++) {
+                if(!lines[i].trim()) continue;
+                const row = lines[i].split(','); 
+                const id = row[0]?.trim();
+                const date = row[1]?.trim();
+                const subject = row[2]?.trim();
+                const topic = row.slice(3).join(',').trim(); 
+                if(id && topic) {
+                    result.push({ id, date, subject, topic });
+                }
+            }
+            return result.reverse(); 
+        }
+
+        function render() {
+            const container = document.getElementById('tracker-container');
+            container.innerHTML = '';
+            let lastDate = '';
+            let totalTasks = 0;
+            let completedTasks = 0;
+
+            allTasks.forEach(t => {
+                const status = localStorage.getItem(t.id) || 'pending';
+                if(status === 'done') completedTasks++;
+                totalTasks++;
+            });
+
+            const pct = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+            document.getElementById('progress-bar').style.width = `${pct}%`;
+            document.getElementById('progress-text').innerText = `${pct}% Complete`;
+
+            const filteredTasks = allTasks.filter(task => {
+                const status = localStorage.getItem(task.id) || 'pending';
+                if (currentFilter === 'all') return true;
+                if (currentFilter === 'done') return status === 'done';
+                if (currentFilter === 'pending') return status !== 'done';
+            });
+
+            if (filteredTasks.length === 0) {
+                container.innerHTML = '<div class="loading">No tasks found in this view.</div>';
+                return;
+            }
+
+            filteredTasks.forEach(item => {
+                const status = localStorage.getItem(item.id) || 'pending';
+                if(item.date !== lastDate) {
+                    const dateHeader = document.createElement('div');
+                    dateHeader.className = 'date-header';
+                    const dateObj = new Date(item.date);
+                    const dateStr = isNaN(dateObj) ? item.date : dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                    dateHeader.innerText = dateStr;
+                    container.appendChild(dateHeader);
+                    lastDate = item.date;
+                }
+                const card = document.createElement('div');
+                card.className = `task-card status-${status}`;
+                card.innerHTML = `
+                    <div class="task-content">
+                        <span class="subject-badge tag-${item.subject}">${item.subject}</span>
+                        <h3 class="task-title">${item.topic}</h3>
+                    </div>
+                    <div class="actions">
+                        <button class="icon-btn btn-flag" onclick="toggleStatus('${item.id}', 'review')">⚠️</button>
+                        <button class="icon-btn btn-check" onclick="toggleStatus('${item.id}', 'done')">✅</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleStatus(id, newStatus) {
+            const current = localStorage.getItem(id);
+            if (current === newStatus) {
+                localStorage.removeItem(id); 
+            } else {
+                localStorage.setItem(id, newStatus); 
+            }
+            render(); 
+        }
+
+        function setFilter(filterType, btnElement) {
+            currentFilter = filterType;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+            render();
+        }
+
+        init();
+    </script>
+</body>
+</html>
