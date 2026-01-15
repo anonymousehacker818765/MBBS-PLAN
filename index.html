@@ -168,15 +168,6 @@ body{
   <h1 class="title" id="pageTitle">My Feed</h1>
 
 
-
-  <div style="padding:0 20px 10px;">
-  <button id="loginBtn" class="tab-btn">
-    Sign in with Google
-  </button>
-</div>
-
-
-
   <div style="padding:0 20px 10px; display:flex; justify-content:flex-end;">
   <img
     id="profileAvatar"
@@ -324,24 +315,6 @@ body{
     });
   };
 </script>
-
-
-  
-
-
-  
-
-<script>
-  const provider = new firebase.auth.GoogleAuthProvider();
-  const loginBtn = document.getElementById('loginBtn');
-
-  loginBtn.onclick = () => {
-    auth.signInWithPopup(provider);
-  };
-</script>
-
-  
-
 
   
   
