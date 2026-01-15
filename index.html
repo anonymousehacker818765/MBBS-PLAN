@@ -137,6 +137,33 @@ body{
 
 <body>
 
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" style="
+  position:fixed;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background:var(--bg);
+  z-index:500;
+  text-align:center;
+">
+  <h1 style="font-size:2rem; margin-bottom:8px;">MBBS Tracker</h1>
+  <p style="color:var(--muted); margin-bottom:20px;">
+    Plan • Track • Complete
+  </p>
+  <button id="loginBtn" class="tab-btn" style="padding:12px 24px;">
+    Continue with Google
+  </button>
+</div>
+
+
+
+<div id="app" style="display:none;">
+
+  
+
 <div class="header">
   <h1 class="title" id="pageTitle">My Feed</h1>
 
@@ -282,6 +309,24 @@ body{
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
 </script>
+
+
+<script>
+  // Google Auth provider
+  const provider = new firebase.auth.GoogleAuthProvider();
+
+  // Login button
+  const loginBtn = document.getElementById('loginBtn');
+
+  loginBtn.onclick = () => {
+    auth.signInWithPopup(provider).catch(err => {
+      alert(err.message);
+    });
+  };
+</script>
+
+
+  
 
 
   
@@ -635,20 +680,31 @@ sidebarLogout.onclick = () => {
 ========================= */
 
 auth.onAuthStateChanged(user => {
-  if (user) {
-    loginBtn.style.display = 'none';
+  const loginScreen = document.getElementById('loginScreen');
+  const app = document.getElementById('app');
 
+  if (user) {
+    // Show app, hide login
+    loginScreen.style.display = 'none';
+    app.style.display = 'block';
+
+    // Avatar
     avatar.src = user.photoURL || '';
     avatar.style.display = 'block';
 
+    // Sidebar info
     sidebarAvatar.src = user.photoURL || '';
     sidebarName.textContent = user.displayName || 'User';
     sidebarEmail.textContent = user.email || '';
 
+    // Greeting
     const firstName = user.displayName?.split(' ')[0] || 'Student';
     pageTitle.textContent = `Hello, ${firstName}`;
   } else {
-    loginBtn.style.display = 'block';
+    // Show login, hide app
+    app.style.display = 'none';
+    loginScreen.style.display = 'flex';
+
     avatar.style.display = 'none';
     pageTitle.textContent = 'My Feed';
   }
@@ -660,6 +716,11 @@ auth.onAuthStateChanged(user => {
 
   
 </script>
+
+  
+</div>
+
+  
 
 </body>
 </html>
