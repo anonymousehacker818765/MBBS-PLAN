@@ -190,6 +190,28 @@ body{
   </button>
 </div>
 
+
+<!-- Firebase SDKs (COMPAT) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyA8m3dMtEJXZc8DYkVXpDZ3IOoLEIJLJlM",
+    authDomain: "mbbs-tracker-c6a28.firebaseapp.com",
+    projectId: "mbbs-tracker-c6a28",
+    storageBucket: "mbbs-tracker-c6a28.appspot.com",
+    messagingSenderId: "725685358961",
+    appId: "1:725685358961:web:c1103c31f8604930c326d0"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+</script>
+
+
+  
+
 <script>
 /* =========================
    CONFIG
