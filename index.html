@@ -197,6 +197,21 @@ body{
   <h1 class="title" id="pageTitle">My Feed</h1>
 
 
+  <div
+  id="streakDisplay"
+  style="
+    padding:0 20px 8px;
+    font-size:0.9rem;
+    color:#fbbf24;
+    font-weight:600;
+    display:none;
+  "
+>
+  🔥 0-day streak
+</div>
+
+
+
   <div style="padding:0 20px 10px; display:flex; justify-content:flex-end;">
   <img
     id="profileAvatar"
@@ -366,9 +381,18 @@ let subjectFilter = 'All';
 let statusFilter = 'All';
 let currentMonth = new Date(); // shared between calendar & monthly progress
 let jumpDate = null;
+let sheetReady = false;
+let firestoreReady = false;
+let streakCount = 0;
+let lastCompletionDate = null;
+
+
+
 // 🔥 Firestore user state
 let currentUser = null;
 let completedTasks = new Set();
+firestoreReady = true;
+tryRenderApp();
 let sessionToastShown = false;
 
 /* =========================
@@ -382,6 +406,17 @@ const displayDate = key => {
   return `${d}/${m}/${y}`; // DD/MM/YYYY
 };
 const monthTitle = d => d.toLocaleDateString('en-GB',{month:'long', year:'numeric'});
+
+function todayKey() {
+  return toKey(new Date());
+}
+
+function yesterdayKey() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return toKey(d);
+}
+
 
 
 // 👉 ADD TOAST FUNCTION HERE
@@ -432,28 +467,64 @@ function showPendingSummaryToast() {
 /* =========================
    INIT
 ========================= */
-fetch(SHEET_URL).then(r=>r.text()).then(text=>{
-  allData = text.split('\n').slice(1).map((row,i)=>{
-    if(!row.trim()) return null;
-    const c = row.split(',');
-    if(c.length < 4) return null;
-    return {
-      id: clean(c[0]),
-      date: clean(c[1]),       // YYYY-MM-DD
-      subject: clean(c[2]),
-      topic: clean(c.slice(3).join(',')),
-      order: i
-    };
-  }).filter(Boolean);
+fetch(SHEET_URL)
+  .then(r => r.text())
+  .then(text => {
+    allData = text.split('\n').slice(1).map((row,i)=>{
+      if(!row.trim()) return null;
+      const c = row.split(',');
+      if(c.length < 4) return null;
+      return {
+        id: clean(c[0]),
+        date: clean(c[1]),
+        subject: clean(c[2]),
+        topic: clean(c.slice(3).join(',')),
+        order: i
+      };
+    }).filter(Boolean);
 
-  renderFeed();
-  renderCalendar();
-  renderProgress();
-});
+    sheetReady = true;
+    tryRenderApp();
+  });
+
 
 /* =========================
    FEED
 ========================= */
+
+function calculateStreak() {
+  const dates = [...completedTasks]
+    .map(id => allData.find(t => t.id === id)?.date)
+    .filter(Boolean);
+
+  const uniqueDates = [...new Set(dates)].sort().reverse();
+
+  streakCount = 0;
+  let current = todayKey();
+
+  for (const d of uniqueDates) {
+    if (d === current) {
+      streakCount++;
+      current = yesterdayKey();
+    } else {
+      break;
+    }
+  }
+}
+
+
+
+  
+function tryRenderApp() {
+  if (!sheetReady || !firestoreReady) return;
+
+  calculateStreak();
+  renderFeed();
+  renderCalendar();
+  renderProgress();
+}
+
+  
 function renderFeed(){
   const feed = document.getElementById('feed');
   feed.innerHTML = '';
@@ -475,6 +546,8 @@ function renderFeed(){
       feed.appendChild(h);
       lastKey = t.date;
     }
+
+    
 
     const task = document.createElement('div');
     task.className = 'task' + (completedTasks.has(t.id)?' done':'');
