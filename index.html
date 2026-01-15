@@ -141,6 +141,15 @@ body{
   <h1 class="title" id="pageTitle">My Feed</h1>
 
 
+
+  <div style="padding:0 20px 10px;">
+  <button id="loginBtn" class="tab-btn">
+    Sign in with Google
+  </button>
+</div>
+
+
+
   <div style="padding:0 20px 10px; display:flex; justify-content:flex-end;">
   <img
     id="profileAvatar"
@@ -274,6 +283,19 @@ body{
   const auth = firebase.auth();
 </script>
 
+
+  
+
+<script>
+  const provider = new firebase.auth.GoogleAuthProvider();
+  const loginBtn = document.getElementById('loginBtn');
+
+  loginBtn.onclick = () => {
+    auth.signInWithPopup(provider);
+  };
+</script>
+
+  
 
 
   
@@ -614,20 +636,19 @@ sidebarLogout.onclick = () => {
 
 auth.onAuthStateChanged(user => {
   if (user) {
-    // Show avatar
+    loginBtn.style.display = 'none';
+
     avatar.src = user.photoURL || '';
     avatar.style.display = 'block';
 
-    // Fill sidebar
     sidebarAvatar.src = user.photoURL || '';
     sidebarName.textContent = user.displayName || 'User';
     sidebarEmail.textContent = user.email || '';
 
-    // Personal greeting
     const firstName = user.displayName?.split(' ')[0] || 'Student';
     pageTitle.textContent = `Hello, ${firstName}`;
   } else {
-    // Logged out
+    loginBtn.style.display = 'block';
     avatar.style.display = 'none';
     pageTitle.textContent = 'My Feed';
   }
