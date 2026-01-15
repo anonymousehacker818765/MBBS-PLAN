@@ -369,6 +369,8 @@ let jumpDate = null;
 // 🔥 Firestore user state
 let currentUser = null;
 let completedTasks = new Set();
+let sessionToastShown = false;
+
 /* =========================
    HELPERS
 ========================= */
@@ -397,7 +399,36 @@ function showToast(message) {
     toast.classList.remove('show');
   }, 2200);
 }
+  
+function showPendingSummaryToast() {
+  if (sessionToastShown) return;
+  sessionToastShown = true;
 
+  const totalPending = allData.filter(t => !completedTasks.has(t.id)).length;
+
+  const firstName = currentUser?.displayName?.split(' ')[0] || 'Student';
+
+  if (totalPending === 0) {
+    showToast(`All caught up, ${firstName}! 🎉`);
+    return;
+  }
+
+  const subjects = {};
+  allData.forEach(t => {
+    if (!completedTasks.has(t.id)) {
+      subjects[t.subject] = (subjects[t.subject] || 0) + 1;
+    }
+  });
+
+  const parts = Object.entries(subjects)
+    .map(([sub, count]) => `${count} ${sub}`)
+    .slice(0, 2);
+
+  showToast(`Welcome back, ${firstName} — ${parts.join(', ')} pending.`);
+}
+
+
+  
 /* =========================
    INIT
 ========================= */
@@ -497,6 +528,9 @@ function renderFeed(){
     const chk = document.createElement('div');
     chk.className = 'check';
     chk.textContent = completedTasks.has(t.id)?'✓':'';
+
+
+    
     chk.onclick = async () => {
       if (!currentUser) return;
     
@@ -506,18 +540,30 @@ function renderFeed(){
         .collection('completions')
         .doc(t.id);
     
-      if (completedTasks.has(t.id)) {
+      const wasCompleted = completedTasks.has(t.id);
+    
+      if (wasCompleted) {
         await ref.delete();
         completedTasks.delete(t.id);
       } else {
         await ref.set({ done: true });
         completedTasks.add(t.id);
+    
+        // 🔔 TOAST — completion feedback
+        const firstName = currentUser.displayName?.split(' ')[0] || 'Student';
+        const subject = t.subject;
+        const titleText = t.topic.includes('|')
+          ? t.topic.split('|')[0].trim()
+          : t.topic;
+    
+        showToast(`Nice work, ${firstName}! ${titleText} completed.`);
       }
     
       renderFeed();
       renderCalendar();
       renderProgress();
     };
+
 
     act.appendChild(chk);
     task.append(strip, body, act);
@@ -757,6 +803,8 @@ auth.onAuthStateChanged(async user => {
     renderFeed();
     renderCalendar();
     renderProgress();
+    showPendingSummaryToast();
+
 
   } else {
     currentUser = null;
@@ -767,6 +815,9 @@ auth.onAuthStateChanged(async user => {
 
     avatar.style.display = 'none';
     pageTitle.textContent = 'My Feed';
+
+    sessionToastShown = false;
+
   }
 });
 
