@@ -383,8 +383,8 @@ function renderFeed(){
 
   let data = [...allData];
   if(subjectFilter !== 'All') data = data.filter(t=>t.subject === subjectFilter);
-  if(statusFilter === 'Done') data = data.filter(t=>localStorage.getItem(t.id));
-  if(statusFilter === 'Pending') data = data.filter(t=>!localStorage.getItem(t.id));
+  if(statusFilter === 'Done') data = data.filter(t=>completedTasks.has(t.id));
+  if(statusFilter === 'Pending') data = data.filter(t=>!completedTasks.has(t.id));
 
   data.sort((a,b)=>a.date.localeCompare(b.date) || a.order-b.order);
 
@@ -400,7 +400,7 @@ function renderFeed(){
     }
 
     const task = document.createElement('div');
-    task.className = 'task' + (localStorage.getItem(t.id)?' done':'');
+    task.className = 'task' + (completedTasks.has(t.id)?' done':'');
     task.dataset.sub = t.subject;
 
     const strip = document.createElement('div');
@@ -450,10 +450,27 @@ function renderFeed(){
 
     const chk = document.createElement('div');
     chk.className = 'check';
-    chk.textContent = localStorage.getItem(t.id)?'✓':'';
-    chk.onclick = ()=>{
-      localStorage.getItem(t.id) ? localStorage.removeItem(t.id) : localStorage.setItem(t.id,'1');
-      renderFeed(); renderCalendar(); renderProgress();
+    chk.textContent = completedTasks.has(t.id)?'✓':'';
+    chk.onclick = async () => {
+      if (!currentUser) return;
+    
+      const ref = db
+        .collection('users')
+        .doc(currentUser.uid)
+        .collection('completions')
+        .doc(t.id);
+    
+      if (completedTasks.has(t.id)) {
+        await ref.delete();
+        completedTasks.delete(t.id);
+      } else {
+        await ref.set({ done: true });
+        completedTasks.add(t.id);
+      }
+    
+      renderFeed();
+      renderCalendar();
+      renderProgress();
     };
 
     act.appendChild(chk);
@@ -506,7 +523,7 @@ function renderCalendar(){
     // dot logic (truthful, filter-independent)
     const dayTasks = allData.filter(t=>t.date === key);
     if(dayTasks.length){
-      const allDone = dayTasks.every(t=>localStorage.getItem(t.id));
+      const allDone = dayTasks.every(t=>completedTasks.has(t.id));
       const dots = document.createElement('div');
       dots.className = 'cal-dots';
       const dot = document.createElement('div');
@@ -541,7 +558,7 @@ function renderProgress(){
 
   // All-time
   const total = allData.length;
-  const done = allData.filter(t=>localStorage.getItem(t.id)).length;
+  const done = allData.filter(t=>completedTasks.has(t.id)).length;
 
   const allCard = document.createElement('div');
   allCard.className = 'progress-card';
@@ -556,7 +573,7 @@ function renderProgress(){
   // Subject-wise
   ['Anatomy','Physiology','Biochemistry'].forEach(s=>{
     const t = allData.filter(x=>x.subject===s);
-    const d = t.filter(x=>localStorage.getItem(x.id)).length;
+    const d = t.filter(x=>completedTasks.has(x.id)).length;
     const c = document.createElement('div');
     c.className = 'progress-card';
     c.innerHTML = `
@@ -573,7 +590,7 @@ function renderProgress(){
     const [yy,mm] = t.date.split('-').map(Number);
     return yy===y && mm===m;
   });
-  const mdone = monthTasks.filter(t=>localStorage.getItem(t.id)).length;
+  const mdone = monthTasks.filter(t=>completedTasks.has(t.id)).length;
 
   const mcard = document.createElement('div');
   mcard.className = 'progress-card';
