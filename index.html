@@ -174,6 +174,24 @@ body{
 
 <body>
 
+<!-- Offline Banner -->
+<div id="offlineBanner" style="
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  background:#7c2d12;
+  color:#fff;
+  text-align:center;
+  padding:8px;
+  font-size:0.85rem;
+  display:none;
+  z-index:998;
+">
+  You’re offline. Changes will sync when you’re back online.
+</div>
+
+  
 <!-- App Loader -->
 <div id="appLoader" style="
   position:fixed;
@@ -912,6 +930,23 @@ auth.onAuthStateChanged(async user => {
     renderProgress();
     showPendingSummaryToast();
 
+    setTimeout(() => {
+      const pendingCount = allData.filter(
+        t => !completedTasks.has(t.id)
+      ).length;
+    
+      const name = user.displayName?.split(' ')[0] || 'Hemanth';
+    
+      if (pendingCount > 0) {
+        showToast(
+          `${name}, you have ${pendingCount} task${pendingCount > 1 ? 's' : ''} pending today`
+        );
+      } else {
+        showToast(`Great work, ${name}! All tasks completed 🎉`);
+      }
+    }, 800);
+    
+    
 
   } else {
     document.getElementById('appLoader').style.display = 'none';
@@ -928,6 +963,22 @@ auth.onAuthStateChanged(async user => {
 
   }
 });
+
+function updateOnlineStatus() {
+  const banner = document.getElementById('offlineBanner');
+  if (navigator.onLine) {
+    banner.style.display = 'none';
+  } else {
+    banner.style.display = 'block';
+  }
+}
+
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+// run once on load
+updateOnlineStatus();
+  
 
 </script>  
 </div>
