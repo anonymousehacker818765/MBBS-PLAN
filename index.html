@@ -132,6 +132,35 @@ body{
 }
 .nav-btn.active{color:var(--text)}
 .nav-icon{font-size:1.4rem; margin-bottom:4px}
+
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 110px; /* above nav bar */
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #020617;
+  color: #f8fafc;
+  padding: 12px 18px;
+  border-radius: 10px;
+  border: 1px solid #334155;
+  font-size: 0.9rem;
+  font-weight: 600;
+  opacity: 0;
+  z-index: 999;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+
+  
+  
 </style>
 </head>
 
@@ -351,6 +380,23 @@ const displayDate = key => {
   return `${d}/${m}/${y}`; // DD/MM/YYYY
 };
 const monthTitle = d => d.toLocaleDateString('en-GB',{month:'long', year:'numeric'});
+
+
+// 👉 ADD TOAST FUNCTION HERE
+let toastTimer = null;
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+
+  toast.textContent = message;
+  toast.classList.add('show');
+
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2200);
+}
 
 /* =========================
    INIT
@@ -726,5 +772,6 @@ auth.onAuthStateChanged(async user => {
 
 </script>  
 </div>
+<div id="toast" class="toast"></div>
 </body>
 </html>
